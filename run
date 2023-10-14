@@ -1,0 +1,25 @@
+#!/bin/bash
+
+start() {
+    # Usamos docker-compose para construir y correr los servicios
+    sudo docker-compose -f docker-compose.yml up
+}
+
+restart() {
+    # Reiniciamos los servicios
+    docker-compose down
+    sudo docker-compose build
+    sudo docker-compose -f docker-compose.yml up 
+}
+
+case "$1" in
+    "start")
+        start
+        ;;
+    "restart")
+        restart
+        ;;
+    *)
+        echo "Uso: ./run start|restart"
+        ;;
+esac
