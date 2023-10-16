@@ -1,6 +1,6 @@
 from django.db.models.manager import Manager
 
-class UsersManager(Manager):
+class PlantManager(Manager):
     
     def get_list(self):
         client_list = []

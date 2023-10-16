@@ -1,2 +1,1 @@
 # Planty-backend
-test

@@ -1,5 +1,5 @@
 from django.db import models
-from src.Plants.manager import UsersManager
+from src.Plants.manager import PlantManager
 from uuid import uuid4
 
 # Create your models here.
@@ -11,4 +11,4 @@ class Plants_info(models.Model):
     temperature = models.PositiveSmallIntegerField()
     light = models.PositiveSmallIntegerField()
     watering = models.PositiveSmallIntegerField()
-    objects = UsersManager()
+    objects = PlantManager()
