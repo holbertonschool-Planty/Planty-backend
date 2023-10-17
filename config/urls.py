@@ -1,12 +1,22 @@
 from django.contrib import admin
 from django.urls import path
 from ninja import NinjaAPI
+from src.Users.API.users_routes import router as users_router
+from src.schemas.schemas import CustomBadRequest
+from src.schemas.schemas import BadRequestResponse 
 
-api = NinjaAPI()
+api = NinjaAPI(
+    title="Planty",
+    description="Backend of Planty",
+    auth=None,
+)
 
-# @api.get("/hello")
-# def hello(request):
-#     return "Hello world"
+@api.exception_handler(CustomBadRequest)
+def handle_bad_request(request, exc: CustomBadRequest):
+    return api.create_response(request, BadRequestResponse(detail=exc.detail), status=400)
+
+
+api.add_router("users", users_router)
 
 urlpatterns = [
     path('admin/', admin.site.urls),

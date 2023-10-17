@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     "corsheaders",
+    "src.Users"
 ]
 
 MIDDLEWARE = [
@@ -86,6 +87,10 @@ DATABASES = {
         'PORT': '5432',
     }
 }
+
+# User principally
+
+AUTH_USER_MODEL = 'Users.Users'
 
 
 # Password validation
