@@ -11,6 +11,12 @@ class Users(AbstractBaseUser):
     objects = UsersManager()
     USERNAME_FIELD = 'email'
 
+    is_deleted = models.BooleanField(default=False)
+
+    def delete(self): 
+        self.is_deleted = True 
+        self.save()
+
 class UserToken(models.Model):
     user = models.OneToOneField(Users, on_delete=models.CASCADE)
     token = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)

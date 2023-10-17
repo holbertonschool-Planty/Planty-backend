@@ -3,11 +3,14 @@ from utils.models_loads import get_usersToken_model
 from django.shortcuts import get_object_or_404
 from django.contrib.auth import authenticate
 from uuid import UUID
+from django.db.models import QuerySet
 from src.schemas import users_schemas
 from django.contrib.auth.models import BaseUserManager
 
 
 class UsersManager(BaseUserManager):
+    def get_queryset(self):
+        return QuerySet(self.model, using=self._db).exclude(is_deleted=True)
 
     def create_user(self, **data):
         if not data["email"] or not data["password"]:
