@@ -24,15 +24,16 @@ class UserInput(Schema):
 class UserLogin(Schema):
     name: str = None
     email: str 
-    password: str
+    password: str = None
 
     @validator("email", pre=True, always=True)
     def email_must_be_exist(cls, email):
         if get_users_model().objects.filter(email=email).exists():
             return email
-        raise CustomBadRequest("Email doest not exist.")
+        raise CustomBadRequest("The credentials provided are invalid.")
 
 class UserOutput(Schema):
     id: UUID4
     name: str
     email: str
+    token: UUID4 = None
