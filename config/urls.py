@@ -2,6 +2,7 @@ from django.contrib import admin
 from django.urls import path
 from ninja import NinjaAPI
 from src.Users.API.users_routes import router as users_router
+from src.Users.API.userphone_routes import router as userphone_router
 from src.schemas.schemas import CustomBadRequest
 from src.schemas.schemas import BadRequestResponse 
 
@@ -17,6 +18,7 @@ def handle_bad_request(request, exc: CustomBadRequest):
 
 
 api.add_router("users", users_router)
+api.add_router("users/{users_id}/token", userphone_router)
 
 urlpatterns = [
     path('admin/', admin.site.urls),
