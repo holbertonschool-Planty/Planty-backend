@@ -1,6 +1,7 @@
-from typing import List, Any, Dict
+from typing import Dict
 from ninja import Router
 from uuid import UUID
+from utils.authentication import TokenAuth
 from utils.models_loads import get_users_model
 from django.shortcuts import get_object_or_404
 from src.schemas import users_schemas, schemas
@@ -32,10 +33,10 @@ def get_object_users(request, users_id: UUID):
 )
 
 def create_object_users(request, data: users_schemas.UserInput):
-    return get_users_model().objects.create_user(dict(data))
+    return get_users_model().objects.register_user(dict(data))
 
 @router.post(
-    "/login",
+    "login/",
     response={
         200: users_schemas.UserOutput,
         400: schemas.BadRequestResponse,
@@ -46,8 +47,10 @@ def create_object_users(request, data: users_schemas.UserInput):
 def login_object_users(request, data: users_schemas.UserLogin):
     return get_users_model().objects.login_user(data)
 
+
 @router.put(
     "{users_id}",
+        auth=TokenAuth(),
         response={
         200: users_schemas.UserOutput,
         400: schemas.BadRequestResponse,
@@ -69,3 +72,4 @@ def update_object_users(request, users_id: UUID, data:users_schemas.UserInput):
 )
 def delete_object_users(request, users_id: UUID):
     return get_users_model().objects.delete_user(users_id)
+
