@@ -1,7 +1,7 @@
 from ninja import Schema
 from ninja.errors import HttpError
 from pydantic import UUID4, validator
-from src.Plants.models import Plants_info
+from utils.model_loads import get_plant_model
 
 class PlantsInfoOutput(Schema):
     id: UUID4
@@ -21,6 +21,6 @@ class PlantsInfoInput(Schema):
 
     @validator("scientific_name", pre=True, always=True)
     def scientific_name_unique(cls, scientific_name):
-        if Plants_info.objects.filter(scientific_name=scientific_name).exists():
+        if get_plant_model().objects.filter(scientific_name=scientific_name).exists():
             raise HttpError(409, f'scientific_name {scientific_name} already exists in database')
         return scientific_name
