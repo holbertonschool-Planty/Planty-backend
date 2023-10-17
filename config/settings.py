@@ -88,6 +88,10 @@ DATABASES = {
     }
 }
 
+# User principally
+
+AUTH_USER_MODEL = 'Users.Users'
+
 
 # Password validation
 # https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators
