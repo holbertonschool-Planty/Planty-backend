@@ -2,6 +2,7 @@ from django.db.models.manager import Manager
 from src.Plants.schemas.plants_info_schemas import PlantsInfoInput, PlantsInfoOutput
 from uuid import UUID
 from django.shortcuts import get_object_or_404
+from ninja.errors import HttpError
 
 class PlantManager(Manager):
     
@@ -26,6 +27,10 @@ class PlantManager(Manager):
         return 201, self.create_schema(plant_obj)
     
     def update_plant(self, plant_id: UUID, data: PlantsInfoInput):
+        values = [data.temperature, data.light, data.watering]
+        for value in values:
+            if value < 0:
+                raise HttpError(400, 'The value must be positive')
         plant_obj = get_object_or_404(self.model, id=plant_id)
         plant_obj.station = data.station
         plant_obj.temperature = data.temperature
