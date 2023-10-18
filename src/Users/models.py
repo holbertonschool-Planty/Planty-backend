@@ -1,6 +1,7 @@
 from django.contrib.auth.models import AbstractBaseUser
 from django.db import models
-from src.Users.manager import UsersManager
+from src.Users.manager import UsersManager, UsersPhoneManager
+from src.base.models import BaseModel
 import uuid
 
 class Users(AbstractBaseUser):
@@ -17,7 +18,15 @@ class Users(AbstractBaseUser):
         self.is_deleted = True 
         self.save()
 
-class UserToken(models.Model):
+class UserToken(BaseModel):
     user = models.OneToOneField(Users, on_delete=models.CASCADE)
     token = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)
     created_at = models.DateTimeField(auto_now_add=True)
+
+
+
+class UserPhone(BaseModel):
+    id = models.UUIDField(default=uuid.uuid4, primary_key=True, editable=False)
+    users_id = models.ForeignKey(Users, on_delete=models.CASCADE)
+    token = models.CharField(unique=True)
+    objects = UsersPhoneManager()
