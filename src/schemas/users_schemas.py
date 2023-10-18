@@ -1,5 +1,5 @@
 from pydantic import validator, UUID4
-from utils.models_loads import get_users_model
+from utils.models_loads import get_users_model, get_userPhone_model
 from ninja.orm import create_schema
 from ninja import Schema
 from src.schemas.schemas import CustomBadRequest
@@ -37,3 +37,15 @@ class UserOutput(Schema):
     name: str
     email: str
     token: UUID4 = None
+
+
+
+class UserPhoneInput(Schema):
+    users_id: UUID4
+    token: str
+    
+class UserPhoneOutput(Schema):
+    id: UUID4
+    user: UserOutput
+    token: str
+
