@@ -9,3 +9,6 @@ def get_usersToken_model():
 
 def get_userPhone_model():
     return apps.get_model("Users", "UserPhone")
+
+def get_plant_model():
+    return apps.get_model("Plants", "Plants_info")
