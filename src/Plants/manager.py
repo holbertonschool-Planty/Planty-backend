@@ -1,10 +1,11 @@
 from django.db.models.manager import Manager
 from src.schemas.plants_info_schemas import PlantsInfoInput, PlantsInfoOutput
 from uuid import UUID
+from src.base.manager import BaseManager
 from django.shortcuts import get_object_or_404
 from ninja.errors import HttpError
 
-class PlantManager(Manager):
+class PlantManager(BaseManager):
     
     def create_schema(self, plant_obj: PlantsInfoInput):
         return PlantsInfoOutput(
