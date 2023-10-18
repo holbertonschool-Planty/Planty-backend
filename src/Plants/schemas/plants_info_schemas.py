@@ -1,7 +1,7 @@
 from ninja import Schema
 from ninja.errors import HttpError
 from pydantic import UUID4, validator
-from utils.model_loads import get_plant_model
+from utils.models_loads import get_plant_model
 
 class PlantsInfoOutput(Schema):
     id: UUID4
