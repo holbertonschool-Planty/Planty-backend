@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 """
 
 from pathlib import Path
+from datetime import timedelta
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -39,6 +40,9 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     "corsheaders",
+    "src.Plants",
+    "src.Users",
+    "config"
 ]
 
 MIDDLEWARE = [
@@ -87,6 +91,10 @@ DATABASES = {
     }
 }
 
+# User principally
+
+AUTH_USER_MODEL = 'Users.Users'
+
 
 # Password validation
 # https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators
@@ -130,3 +138,20 @@ STATIC_URL = '/static/'
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+# Setting to Celery
+CELERY_BROKER_URL = 'redis://redis:6379/0' # Ajusta según tu configuración de Redis
+CELERY_RESULT_BACKEND = 'redis://redis:6379/0'
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TIMEZONE = 'UTC'  # Ajusta a tu zona horaria
+
+
+CELERY_BEAT_SCHEDULE = {
+    'send-watering-notifications': {
+        'task': 'config.tasks.send_watering_notifications',
+        'schedule': timedelta(days=1),  # Ejecuta la tarea cada 10 segundos
+    },
+}
