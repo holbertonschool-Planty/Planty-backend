@@ -152,6 +152,6 @@ CELERY_TIMEZONE = 'UTC'  # Ajusta a tu zona horaria
 CELERY_BEAT_SCHEDULE = {
     'send-watering-notifications': {
         'task': 'config.tasks.send_watering_notifications',
-        'schedule': timedelta(seconds=10),  # Ejecuta la tarea cada 10 segundos
+        'schedule': timedelta(days=1),  # Ejecuta la tarea cada 10 segundos
     },
 }
