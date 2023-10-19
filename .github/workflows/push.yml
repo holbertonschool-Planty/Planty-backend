@@ -1,0 +1,16 @@
+name: CI
+on: [push, pull_request]
+jobs:
+  build:
+  
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Build the Docker Compose
+      uses: docker-compose build
+
+    - name: Run tests
+      run: docker-compose run planty_be python manage.py test
