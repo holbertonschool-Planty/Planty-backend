@@ -12,3 +12,6 @@ def get_userPhone_model():
 
 def get_plant_model():
     return apps.get_model("Plants", "Plants_info")
+
+def get_planty_model():
+    return apps.get_model("Devices", "Planty")

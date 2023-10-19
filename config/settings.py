@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     "corsheaders",
     "src.Plants",
     "src.Users",
+    "src.Devices",
     "config"
 ]
 

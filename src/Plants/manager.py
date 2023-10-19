@@ -1,4 +1,5 @@
-from src.Plants.schemas.plants_info_schemas import PlantsInfoInput, PlantsInfoOutput
+from django.db.models.manager import Manager
+from src.schemas.plants_info_schemas import PlantsInfoInput, PlantsInfoOutput
 from uuid import UUID
 from src.base.manager import BaseManager
 from django.shortcuts import get_object_or_404

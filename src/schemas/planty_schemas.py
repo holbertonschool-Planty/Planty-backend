@@ -1,0 +1,26 @@
+from ninja import Schema
+from ninja.errors import HttpError
+from pydantic import UUID4, validator
+from utils.models_loads import get_planty_model
+from src.schemas.plants_info_schemas import PlantsInfoOutput
+
+class PlantyOutput(Schema):
+	id: UUID4
+	serie: str
+	actual_temperature: list[int]
+	actual_light: list[int]
+	actual_watering: list[int]
+	plants_info: PlantsInfoOutput
+  
+class PlantyInput(Schema):
+	serie: str
+	actual_temperature: int
+	actual_light: int
+	actual_watering: int
+	plants_info_id: UUID4
+  
+	@validator("serie", pre=True, always=True)
+	def serie_unique(cls, serie):
+		if get_planty_model().objects.filter(serie=serie).exists():
+			raise HttpError(409, f'User already linked to the specified device.')
+		return serie

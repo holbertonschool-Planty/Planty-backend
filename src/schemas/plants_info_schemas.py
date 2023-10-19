@@ -13,7 +13,7 @@ class PlantsInfoOutput(Schema):
 
 
 class PlantsInfoInput(Schema):
-    scientific_name: str
+    scientific_name: str = None
     station: str
     temperature: int
     light: int

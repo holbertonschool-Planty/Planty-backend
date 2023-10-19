@@ -1,5 +1,5 @@
 from ninja import Router
-from src.Plants.schemas.plants_info_schemas import PlantsInfoOutput, PlantsInfoInput
+from src.schemas.plants_info_schemas import PlantsInfoOutput, PlantsInfoInput
 from utils.models_loads import get_plant_model
 from django.shortcuts import get_object_or_404
 from typing import Any, Dict, List
