@@ -7,7 +7,12 @@ jobs:
     steps:
     - name: Checkout repository
       uses: actions/checkout@v2
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v1
+      
     - name: Build the Docker Compose
-      uses: docker-compose build
+      run: docker-compose build
+      
     - name: Run tests
       run: docker-compose run planty_be python manage.py test
