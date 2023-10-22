@@ -49,3 +49,14 @@ class UserPhoneOutput(Schema):
     user: UserOutput
     token: str
 
+class PhoneEventOutput(Schema):
+    id: UUID4
+    user_phone: UserPhoneOutput
+    frequency: int
+    event_type: str
+    message: str
+
+class PhoneEventInput(Schema):
+    frequency: int
+    event_type: str
+    message: str
