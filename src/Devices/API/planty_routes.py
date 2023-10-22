@@ -24,7 +24,7 @@ def add_planty(request, data: PlantyInput):
     500: schemas.InternalServerErrorResponse
 })
 def get_planty(request, planty_id: UUID):
-    return get_object_or_404(get_planty_model(), id=planty_id)
+    return 200, get_object_or_404(get_planty_model(), id=planty_id)
 
 
 @router.delete("/{planty_id}", response={
