@@ -1,8 +1,8 @@
 from ninja import Router
 from src.schemas.plants_info_schemas import PlantsInfoOutput, PlantsInfoInput
 from utils.models_loads import get_plant_model
-from django.shortcuts import get_object_or_404
-from typing import Any, Dict, List
+from django.shortcuts import get_object_or_404, get_list_or_404
+from typing import Dict, List
 from src.schemas import schemas
 from uuid import UUID
 
@@ -15,9 +15,7 @@ router = Router(tags=["Plants info"])
     500: schemas.InternalServerErrorResponse
 })
 def plants_info(request):
-    plants_info = get_plant_model().objects.get_list()
-    return plants_info
-
+    return get_list_or_404(get_plant_model())
 
 @router.get("/{plants_info_id}", response={
     200: PlantsInfoOutput,
