@@ -1,0 +1,41 @@
+version: '3.5'
+
+services:
+  planty_be:
+    image: ${GHCR_IMAGE}
+    container_name: planty_be
+    command: bash -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8080"
+    ports:
+      - "8080:8080"
+    networks:
+      - plantynet
+
+  worker:
+    image: ${GHCR_IMAGE}
+    container_name: planty_wr
+    command: celery -A config worker --loglevel=info
+    depends_on:
+      - redis
+    networks:
+      - plantynet
+
+  beat:
+    image: ${GHCR_IMAGE}
+    container_name: planty_bt
+    command: celery -A config beat --loglevel=info
+    depends_on:
+      - redis
+    networks:
+      - plantynet
+
+  redis:
+    image: redis:latest
+    depends_on:
+      - planty_be
+    networks:
+      - plantynet
+
+
+networks:
+  plantynet:
+    external: true

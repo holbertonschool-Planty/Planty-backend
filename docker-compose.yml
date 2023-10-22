@@ -11,6 +11,8 @@ services:
       - redis
     ports:
       - "8080:8080"
+    networks:
+      - plantynet
 
   worker:
     build: .
@@ -20,6 +22,8 @@ services:
     depends_on:
       - planty_db
       - redis
+    networks:
+      - plantynet
 
   beat:
     build: .
@@ -29,9 +33,13 @@ services:
     depends_on:
       - planty_db
       - redis
+    networks:
+      - plantynet
 
   redis:
     image: redis:latest
+    networks:
+      - plantynet
 
   planty_db:
     image: postgres:latest
@@ -41,6 +49,12 @@ services:
       POSTGRES_DB: planty_db
       POSTGRES_USER: root
       POSTGRES_PASSWORD: "1234"
+    networks:
+      - plantynet
 
 volumes:
   pg_data:
+
+
+networks:
+  plantynet:
