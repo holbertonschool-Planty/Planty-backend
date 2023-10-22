@@ -82,7 +82,7 @@ jobs:
       with:
         ref: "refs/tags/${{ needs.setup.outputs.tag }}"
 
-    - name: Delete Files Exists
+    - name: Delete Files if Exists
       uses: appleboy/ssh-action@master
       with:
         host: ${{ secrets.SERVER_IP_ADDRESS }}
@@ -117,3 +117,14 @@ jobs:
           echo "${{ secrets.GHCR_TOKEN }}" | sudo docker login ghcr.io -u ${{ github.actor }} --password-stdin
           sudo docker pull ${{ needs.setup.outputs.image_name }}
           sudo env GHCR_IMAGE="${{ needs.setup.outputs.image_name }}" docker-compose -f docker-compose.deploy.yml up --build -d
+
+    - name: Cleanup Machine
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.SERVER_IP_ADDRESS }}
+        username: ${{ secrets.SERVER_USERNAME }}
+        key: ${{ secrets.PRIVATE_SSH_KEY }}
+        port: 22
+        script: |
+          sudo rm -rf $HOME/${{ needs.setup.outputs.repo_name }}/
+          sudo docker system prune -a --volumes --force
