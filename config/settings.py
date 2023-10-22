@@ -142,8 +142,8 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
 # Setting to Celery
-CELERY_BROKER_URL = 'redis://redis:6379/0' # Ajusta según tu configuración de Redis
-CELERY_RESULT_BACKEND = 'redis://redis:6379/0'
+CELERY_BROKER_URL = 'redis://redis:6379' # Ajusta según tu configuración de Redis
+CELERY_RESULT_BACKEND = 'redis://redis:6379'
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
@@ -151,8 +151,12 @@ CELERY_TIMEZONE = 'UTC'  # Ajusta a tu zona horaria
 
 
 CELERY_BEAT_SCHEDULE = {
-    'send-watering-notifications': {
-        'task': 'config.tasks.send_watering_notifications',
+    'manage_notifications': {
+        'task': 'manage_notifications',
         'schedule': timedelta(days=1),  # Ejecuta la tarea cada 10 segundos
     },
+    "manage_status_plants": {
+        "task": "manage_status_plants",
+        "schedule": timedelta(hours=4)
+    }
 }
