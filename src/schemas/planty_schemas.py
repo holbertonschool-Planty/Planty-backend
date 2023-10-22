@@ -3,21 +3,22 @@ from ninja.errors import HttpError
 from pydantic import UUID4, validator
 from utils.models_loads import get_planty_model
 from src.schemas.plants_info_schemas import PlantsInfoOutput
+from typing import List
 
 class PlantyOutput(Schema):
 	id: UUID4
 	serie: str
-	actual_temperature: list[int]
-	actual_light: list[int]
-	actual_watering: list[int]
+	actual_temperature: List[int]
+	actual_light: List[int]
+	actual_watering: List[int]
 	plants_info: PlantsInfoOutput
   
 class PlantyInput(Schema):
-	serie: str
+	serie: str = None
 	actual_temperature: int
 	actual_light: int
 	actual_watering: int
-	plants_info_id: UUID4
+	plants_info_id: UUID4 = None
   
 	@validator("serie", pre=True, always=True)
 	def serie_unique(cls, serie):
