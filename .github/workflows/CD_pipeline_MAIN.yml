@@ -1,10 +1,13 @@
 name: CD Planty Backend PRODUCTION
 
+permissions:
+  contents: write
+
 on: 
   push:
     branches:
       - "main"
-      
+
 jobs:
   setup:
     name: Setup
