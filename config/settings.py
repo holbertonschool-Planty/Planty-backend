@@ -45,7 +45,8 @@ INSTALLED_APPS = [
     "src.Users",
     "src.Devices",
     "src.User_devices",
-    "config"
+    "config",
+    "storages"
 ]
 
 MIDDLEWARE = [
@@ -144,21 +145,25 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
 # Setting to Celery
-CELERY_BROKER_URL = 'redis://redis:6379' # Ajusta según tu configuración de Redis
+CELERY_BROKER_URL = 'redis://redis:6379'
 CELERY_RESULT_BACKEND = 'redis://redis:6379'
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
-CELERY_TIMEZONE = 'UTC'  # Ajusta a tu zona horaria
+CELERY_TIMEZONE = 'UTC'
 
 
 CELERY_BEAT_SCHEDULE = {
     'manage_notifications': {
         'task': 'manage_notifications',
-        'schedule': timedelta(days=1),  # Ejecuta la tarea cada 10 segundos
+        'schedule': timedelta(days=1), 
     },
     "manage_status_plants": {
         "task": "manage_status_plants",
         "schedule": timedelta(hours=4)
     }
 }
+
+IMAGE_DEFAULT = config('IMAGE_DEFAULT')
+SERVER_FIREBASE = config("SERVER_FIREBASE")
+SERVER_FIREBASE_PRIVATE_KEY = config("SERVER_FIREBASE_PRIVATE_KEY")
