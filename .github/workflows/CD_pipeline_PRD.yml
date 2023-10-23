@@ -1,0 +1,130 @@
+name: CD Planty Backend PRODUCTION
+
+permissions:
+  contents: write
+
+on: 
+  push:
+    branches:
+      - "main"
+  workflow_dispatch:
+
+jobs:
+  setup:
+    name: Setup
+    runs-on: ubuntu-latest
+    environment:
+      name: github
+    outputs:
+      repo_name: ${{ steps.config.outputs.repo_name }}
+      branch: ${{ steps.config.outputs.branch }}
+      tag: ${{ steps.release_on_push.outputs.tag_name }}
+      image_name: ${{ steps.config.outputs.image_name }}
+
+    steps:
+    - name: Check out code
+      uses: actions/checkout@v4
+
+    - name: Configuration variables and outputs
+      id: config
+      run: |
+        echo "repo_name=$(echo ${{ github.repository }} | awk -F / '{print $2}')" >> $GITHUB_OUTPUT
+        repository_lower=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]') 
+        branch=${GITHUB_REF#refs/heads/}
+        echo "branch=${GITHUB_REF#refs/heads/}" >> $GITHUB_OUTPUT
+        echo "image_name=ghcr.io/$repository_lower/${branch}-planty-backend:latest" >> $GITHUB_OUTPUT
+
+    - name: Bump version and release
+      uses: rymndhng/release-on-push-action@master
+      id: release_on_push
+      with:
+        bump_version_scheme: major
+        use_github_release_notes: true
+        tag_prefix: "${{ steps.config.outputs.branch }}-v"
+        release_name: "Release ${{ steps.config.outputs.branch }} <RELEASE_VERSION>"
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  build:
+    name: Build
+    needs: [setup]
+    runs-on: ubuntu-latest
+    environment:
+      name: github
+
+    steps:
+    - name: Check out code
+      uses: actions/checkout@v4
+      with:
+        ref: "refs/tags/${{ needs.setup.outputs.tag }}"
+
+    - name: Create .env
+      run: echo "${{ secrets.server_env }}" > .env
+
+    - name: Build Docker image
+      run: docker build -t ${{ needs.setup.outputs.image_name }} -f Dockerfile .
+
+    - name: Login to GitHub Container Registry
+      run: echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+    - name: Push Docker image to GitHub Container Registry
+      run: docker push ${{ needs.setup.outputs.image_name }}  
+
+  deploy:
+    name: Deploy
+    needs: [setup, build]
+    runs-on: ubuntu-latest
+    environment:
+      name: github
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        ref: "refs/tags/${{ needs.setup.outputs.tag }}"
+
+    - name: Delete Files if Exists
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.SERVER_IP_ADDRESS }}
+        username: ${{ secrets.SERVER_USERNAME }}    
+        key: ${{ secrets.PRIVATE_SSH_KEY }}
+        port: 22
+        script: |
+          if [ -d "$HOME/${{ needs.setup.outputs.repo_name }}" ]; then
+            sudo rm -rf $HOME/${{ needs.setup.outputs.repo_name }}/
+          fi
+
+
+    - name: Upload application
+      uses: appleboy/scp-action@master
+      with:       
+        host: ${{ secrets.SERVER_IP_ADDRESS }}
+        username: ${{ secrets.SERVER_USERNAME }}    
+        key: ${{ secrets.PRIVATE_SSH_KEY }}
+        port: 22
+        source: "."
+        target: "$HOME/${{ needs.setup.outputs.repo_name }}/"
+      
+    - name: SSH into Server
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.SERVER_IP_ADDRESS }}
+        username: ${{ secrets.SERVER_USERNAME }}
+        key: ${{ secrets.PRIVATE_SSH_KEY }}
+        script: |
+          cd $HOME/${{ needs.setup.outputs.repo_name }}/
+          sudo docker network create plantynet
+          echo "${{ secrets.GHCR_TOKEN }}" | sudo docker login ghcr.io -u ${{ github.actor }} --password-stdin
+          sudo docker pull ${{ needs.setup.outputs.image_name }}
+          sudo env GHCR_IMAGE="${{ needs.setup.outputs.image_name }}" docker-compose -f docker-compose.deploy.yml up --build -d
+
+    - name: Cleanup Machine
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.SERVER_IP_ADDRESS }}
+        username: ${{ secrets.SERVER_USERNAME }}
+        key: ${{ secrets.PRIVATE_SSH_KEY }}
+        port: 22
+        script: |
+          sudo rm -rf $HOME/${{ needs.setup.outputs.repo_name }}/
+          sudo docker system prune -a --volumes --force
