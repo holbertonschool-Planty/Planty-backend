@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     "src.Plants",
     "src.Users",
     "src.Devices",
+    "src.User_devices",
     "config"
 ]
 
