@@ -15,3 +15,6 @@ def get_plant_model():
 
 def get_planty_model():
     return apps.get_model("Devices", "Planty")
+
+def get_phoneEvent_model():
+    return apps.get_model("Users", "UserPhoneEvent")
