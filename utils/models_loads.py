@@ -3,7 +3,6 @@ from django.apps import apps
 def get_users_model():
     return apps.get_model("Users", "Users")
 
-
 def get_usersToken_model():
     return apps.get_model("Users", "UserToken")
 
@@ -18,3 +17,6 @@ def get_planty_model():
 
 def get_phoneEvent_model():
     return apps.get_model("Users", "UserPhoneEvent")
+
+def get_userPlanty_model():
+    return apps.get_model("User_devices", "Users_planty")
