@@ -28,7 +28,7 @@ services:
       - plantynet
 
   beat:
-    container_name: planty_be
+    container_name: planty_bt
     build: .
     command: celery -A config beat --loglevel=info
     volumes:

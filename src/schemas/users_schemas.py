@@ -7,7 +7,7 @@ from src.schemas.schemas import CustomBadRequest
 from typing import Optional
 
 class UserInput(Schema):
-    name: Optional(str)
+    name: Optional[str]
     email: str 
     password: str
 
@@ -39,7 +39,7 @@ class UserOutput(Schema):
     id: UUID4
     name: str
     email: str
-    token: Optional(UUID4)
+    token: Optional[UUID4]
 
 
 class UserPhoneInput(Schema):
