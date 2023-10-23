@@ -2,6 +2,7 @@ version: '3'
 
 services:
   planty_be:
+    container_name: planty_be
     build: .
     command: bash -c "python manage.py makemigrations && python manage.py migrate && python manage.py runserver 0.0.0.0:8080"
     volumes:
@@ -15,6 +16,7 @@ services:
       - plantynet
 
   worker:
+    container_name: planty_wr
     build: .
     command: celery -A config worker --loglevel=info
     volumes:
@@ -26,6 +28,7 @@ services:
       - plantynet
 
   beat:
+    container_name: planty_be
     build: .
     command: celery -A config beat --loglevel=info
     volumes:
@@ -37,11 +40,13 @@ services:
       - plantynet
 
   redis:
+    container_name: redis
     image: redis:latest
     networks:
       - plantynet
 
   planty_db:
+    container_name: planty_db
     image: postgres:latest
     volumes:
       - pg_data:/var/lib/postgresql/data
