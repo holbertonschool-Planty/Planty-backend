@@ -4,6 +4,7 @@ from utils.models_loads import get_users_model, get_userPhone_model
 from ninja.orm import create_schema
 from ninja import Schema
 from src.schemas.schemas import CustomBadRequest
+from typing import Optional
 
 class UserInput(Schema):
     name: Optional(str)
@@ -23,9 +24,10 @@ class UserInput(Schema):
         return password
     
 class UserLogin(Schema):
-    name: Optional(str)
+    name: Optional[str]
     email: str 
-    password: Optional(str)
+    password: str
+
 
     @validator("email", pre=True, always=True)
     def email_must_be_exist(cls, email):
@@ -38,7 +40,6 @@ class UserOutput(Schema):
     name: str
     email: str
     token: Optional(UUID4)
-
 
 
 class UserPhoneInput(Schema):
@@ -61,3 +62,4 @@ class PhoneEventInput(Schema):
     frequency: int
     event_type: str
     message: str
+
