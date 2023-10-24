@@ -25,16 +25,23 @@ class UserPlantyManager(Manager):
         userPlanty_obj = self.create(**data)
         return userPlanty_obj
 
-    def update_planty_user(self, users_id: UUID, planty_id: UUID, data: UserPlantyInput, file: UploadedFile, plant_info_id: UUID = None):
-        userPlanty_obj = get_object_or_404(self.model, user_id=users_id, planty_id=planty_id)
-        for attr, value in data.dict().items():
-            setattr(userPlanty_obj, attr, value)
+    def update_planty_user(self, user_planty_id: UUID, data: UserPlantyInput = None, plant_info_id: UUID = None, file: UploadedFile = None):
+        userPlanty_obj = get_object_or_404(self.model, id=user_planty_id)
+        if data:
+            for attr, value in data.dict().items():
+                setattr(userPlanty_obj, attr, value)
         if file:
             file_url = upload_to_firebase(file)
-            data.image_url = file_url
+            userPlanty_obj.image_url = file_url
             delete_from_firebase(file)
         if plant_info_id:
             plant_info_obj = get_object_or_404(get_plant_model(), id=plant_info_id)
             setattr(userPlanty_obj.planty, "plants_info", plant_info_obj)
         userPlanty_obj.save()
         return 200, userPlanty_obj
+    
+
+    def delete_planty_user(self, user_planty_id: UUID):
+        userPlanty_obj = get_object_or_404(self.model, id=user_planty_id)
+        userPlanty_obj.delete()
+        return 200, {"message": "Deleted sucesfully"}

@@ -1,7 +1,6 @@
 from pydantic import validator, UUID4
 from typing import Optional
-from utils.models_loads import get_users_model, get_userPhone_model
-from ninja.orm import create_schema
+from utils.models_loads import get_users_model
 from ninja import Schema
 from src.schemas.schemas import CustomBadRequest
 from typing import Optional
@@ -9,7 +8,7 @@ from typing import Optional
 class UserInput(Schema):
     name: Optional[str]
     email: str 
-    password: str
+    password: Optional[str]
 
     @validator("email", pre=True, always=True)
     def email_must_be_unique(cls, email):

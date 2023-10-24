@@ -31,7 +31,7 @@ def get_list_phone_by_user(request, users_id: UUID):
     }
 )
 def get_phone_by_user(request, users_id: UUID, user_phone_token: str):
-    userPhone_obj = get_object_or_404(get_userPhone_model(), users_id=users_id, token=user_phone_token)
+    userPhone_obj = get_object_or_404(get_userPhone_model(), user_id=users_id, token=user_phone_token)
     return 200, userPhone_obj
 
 
@@ -82,6 +82,6 @@ def create_event(request, users_id: UUID, user_phone_token: str, data: users_sch
         500: schemas.InternalServerErrorResponse
     }   
 )
-def delete_events(request, users_id: UUID, user_phone_token: str):
+def delete_event(request, users_id: UUID, user_phone_token: str):
     return get_phoneEvent_model().objects.delete_events(users_id, user_phone_token)
 

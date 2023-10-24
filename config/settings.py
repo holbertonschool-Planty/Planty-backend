@@ -58,6 +58,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'corsheaders.middleware.CorsMiddleware',
+    "ninja_put_patch_file_upload_middleware.middlewares.process_put_patch"
 ]
 
 ROOT_URLCONF = 'config.urls'

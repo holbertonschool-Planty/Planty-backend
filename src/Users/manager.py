@@ -13,25 +13,37 @@ from django.db.models import manager
 class UsersManager(BaseUserManager):
     def get_queryset(self):
         return QuerySet(self.model, using=self._db).exclude(is_deleted=True)
+    
+    def get_deleted(self):
+        return QuerySet(self.model, using=self._db).filter(is_deleted=True)
+
 
     def create_user(self, **data):
         if not data["email"] or not data["password"]:
             raise ValueError('The credentials must be set')
-        data["email"] = self.normalize_email(data["email"])
+        data["email"] = self.normalize_email(data.get("email"))
         user = self.model(**data)
-        user.set_password(data["password"])
+        user.set_password(data.get("password"))
         user.save(using=self._db)
         return user
 
     def register_user(self, data: dict):
-        user_obj = self.create_user(**data)
+        if self.filter(email=data.get("email")).exists():
+            raise CustomBadRequest("Email already exists.")
+        try:
+            user_obj = self.get_deleted().get(email=data.get("email"))
+            user_obj.is_deleted = False
+            user_obj.save()
+        except:
+            user_obj = self.create_user(**data)
         return 201, user_obj
    
     def login_user(self, data: users_schemas.UserLogin):
         user = authenticate(email=data.email, password=data.password)
         if user:
             user_token, _ = get_usersToken_model().objects.get_or_create(user=user)
-            return 200, self.create_schema(user, user_token.token)
+            user.token = user_token.token
+            return 200, user
         else:
             raise CustomBadRequest("Invalid credentials")
 
@@ -46,22 +58,11 @@ class UsersManager(BaseUserManager):
         user_obj.delete()
         return 200, {"message": "User deleted succesfully"}
 
-    def create_schema(self, user_obj: users_schemas.UserInput, user_token= None):
-        return users_schemas.UserOutput(
-            id=user_obj.id,
-            name=user_obj.name,
-            email=user_obj.email,
-            token=user_token)
-
 class UsersPhoneManager(manager.Manager):
 
     def get_tokens_by_user(self, users_id: UUID):
-        user_obj = get_object_or_404(get_users_model(), id=users_id)
-        list_token = []
-        tokens = self.all().filter(users_id=users_id)
-        for token in tokens:
-            list_token.append(self.create_schema(user_obj, token))
-        return 200, list_token
+        token_list = get_list_or_404(self.model, user_id=users_id)
+        return 200, token_list
 
     def save_token(self, users_id: UUID, user_phone_token: str):
         user_obj = get_object_or_404(get_users_model(), id=users_id)
