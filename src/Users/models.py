@@ -2,7 +2,6 @@ from django.contrib.auth.models import AbstractBaseUser
 from django.db import models
 from django.utils.timezone import now
 from src.Users.manager import UsersManager, UsersPhoneManager, PhoneEventManager
-from src.base.models import BaseModel
 import uuid
 
 class Users(AbstractBaseUser):
@@ -19,14 +18,14 @@ class Users(AbstractBaseUser):
         self.is_deleted = True 
         self.save()
 
-class UserToken(BaseModel):
+class UserToken(models.Model):
     user = models.ForeignKey(Users, on_delete=models.CASCADE)
     token = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)
     created_at = models.DateTimeField(auto_now_add=True)
 
 
 
-class UserPhone(BaseModel):
+class UserPhone(models.Model):
     id = models.UUIDField(default=uuid.uuid4, primary_key=True, editable=False)
     user = models.ForeignKey(Users, on_delete=models.CASCADE)
     token = models.CharField(unique=True)
