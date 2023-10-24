@@ -59,7 +59,7 @@ jobs:
         ref: "refs/tags/${{ needs.setup.outputs.tag }}"
 
     - name: Create .env
-      run: echo "${{ secrets.server_env }}" > .env
+      run: printf '%s\n' "${{ secrets.server_env }}" > .env
 
     - name: Build Docker image
       run: docker build -t ${{ needs.setup.outputs.image_name }} -f Dockerfile .
