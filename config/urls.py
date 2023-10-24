@@ -25,7 +25,7 @@ def handle_bad_request(request, exc: CustomBadRequest):
 
 api.add_router("users", users_router)
 api.add_router("users/{users_id}/token", userphone_router)
-api.add_router("users", userplanty_router)
+api.add_router("users/{users_id}/planty", userplanty_router)
 api.add_router("plants_info", plants_info_router)
 api.add_router("planty", planty_router)
 

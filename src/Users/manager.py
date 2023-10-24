@@ -81,7 +81,7 @@ class UsersPhoneManager(manager.Manager):
 
 class PhoneEventManager(manager.Manager):
 
-    def create_event(self, userPhone_obj: users_schemas.UserPhoneOutput, data: dict ):
+    def create_event(self, userPhone_obj: users_schemas.UserPhoneOutput, data: dict ) -> users_schemas.PhoneEventOutput:
         data["user_phone"] = userPhone_obj
         phoneEvent_obj = self.create(**data)
         return phoneEvent_obj
@@ -89,6 +89,12 @@ class PhoneEventManager(manager.Manager):
     def delete_event(self, phoneEvent_obj: users_schemas.PhoneEventOutput):
         phoneEvent_obj.delete()
         return {"message": "User deleted succesfully"}
+
+    def create_events(self, list_eventPhone: List[users_schemas.PhoneEventInput], userPhone_obj: users_schemas.UserPhoneOutput) -> List[users_schemas.PhoneEventOutput]:
+        list_events = [] 
+        for event in list_eventPhone:
+            list_events.append(self.create_event(userPhone_obj, dict(event)))
+        return list_events
 
     def delete_events(self, users_id: UUID, user_phone_token: str):
         userPhone_obj = get_object_or_404(get_userPhone_model(), user_id=users_id, token=user_phone_token)
