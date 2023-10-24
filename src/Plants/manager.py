@@ -1,20 +1,19 @@
+from typing import List
 from src.schemas.plants_info_schemas import PlantsInfoInput
 from uuid import UUID
-from src.base.manager import BaseManager
+from django.db.models import Manager
 from django.shortcuts import get_object_or_404
 from ninja.errors import HttpError
 
-class PlantManager(BaseManager):
+class PlantManager(Manager):
 
-    def create_plant(self, data: dict):
-        plant_obj = self.create(**data)
+    def create_plant(self, data: PlantsInfoInput):
+        self.validate_values([data.temperature, data.light, data.watering])
+        plant_obj = self.create(**dict(data))
         return 201, plant_obj
 
     def update_plant(self, plant_id: UUID, data: PlantsInfoInput):
-        values = [data.temperature, data.light, data.watering]
-        for value in values:
-            if value < 0:
-                raise HttpError(400, 'The value must be positive')
+        self.validate_values([data.temperature, data.light, data.watering])
         plant_obj = get_object_or_404(self.model, id=plant_id)
         plant_obj.station = data.station
         plant_obj.temperature = data.temperature
@@ -27,3 +26,8 @@ class PlantManager(BaseManager):
         plant_obj = get_object_or_404(self.model, id=plant_id)
         plant_obj.delete()
         return 200, {"message": "Plant information deleted successfully."}
+    
+    def validate_values(self, values: List[int]):
+        for value in values:
+            if value < 0:
+                raise HttpError(400, 'The values must be positive')
