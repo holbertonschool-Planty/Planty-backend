@@ -1,3 +1,4 @@
+from django.shortcuts import get_object_or_404
 from ninja import Schema
 from ninja.errors import HttpError
 from pydantic import UUID4, validator
@@ -19,9 +20,3 @@ class PlantyInput(Schema):
 	actual_light: int
 	actual_watering: int
 	plants_info_id: Optional[UUID4] = None
-  
-	@validator("serie", pre=True, always=True)
-	def serie_unique(cls, serie):
-		if get_planty_model().objects.filter(serie=serie).exists():
-			raise HttpError(409, f'Specified device already exists.')
-		return serie

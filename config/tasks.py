@@ -17,7 +17,7 @@ def manage_notifications():
             status = send_notifications(expo_token=notification.user_phone.token, title=notification.event_type, body=notification.message)
             list_responses.append({"event": notification, "response": status})
             if status == 200:
-                notification.last_event_date = notification.last_event_date + timedelta(days=notification.frequency)
+                notification.last_event_date = notification.last_event_date + timedelta(days=notification.frequency).date()
                 notification.save()
     return list_responses
 
