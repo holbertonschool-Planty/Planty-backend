@@ -7,7 +7,7 @@ from typing import Dict, List
 from src.schemas import schemas
 from uuid import UUID
 
-router = Router(tags=["Plants info"])
+router = Router(tags=["Plants information"])
 
 @router.get("", response={
     200: List[PlantsInfoOutput],
@@ -34,7 +34,7 @@ def get_plant_info_id(request, plants_info_id: UUID):
     500: schemas.InternalServerErrorResponse
 })
 def add_plant_info(request, data: PlantsInfoInput):
-    return get_plant_model().objects.create_plant(dict(data))
+    return get_plant_model().objects.create_plant(data)
 
 @router.put("/{plants_info_id}", response={
     200: PlantsInfoOutput,
