@@ -9,12 +9,15 @@ from uuid import UUID
 router = Router(tags=["Planty"])
 
 @router.post("", response={
-    201: PlantyOutput,
+    201: UUID,
     400: schemas.BadRequestResponse,
     404: schemas.NotFoundResponse,
+    409: UUID,
     500: schemas.InternalServerErrorResponse
 })
 def add_planty(request, data: PlantyInput):
+    if get_planty_model().objects.filter(serie=data.serie).exists():
+        return 409, get_object_or_404(get_planty_model(), serie=data.serie).id
     return get_planty_model().objects.create_planty(dict(data))
 
 @router.get("/{planty_id}", response={
