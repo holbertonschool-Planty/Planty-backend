@@ -34,7 +34,21 @@ def get_plant_info_id(request, plants_info_id: UUID):
     500: schemas.InternalServerErrorResponse
 })
 def add_plant_info(request, data: PlantsInfoInput):
-    return get_plant_model().objects.create_plant(data)
+    return 201, get_plant_model().objects.create_plant(data)
+
+
+@router.post(
+    "list/",
+    response={
+        201: List[PlantsInfoOutput],
+        400: schemas.BadRequestResponse,
+        404: schemas.NotFoundResponse,
+        500: schemas.InternalServerErrorResponse
+})
+def add_list_plants_info(request, data: List[PlantsInfoInput]):
+    return get_plant_model().objects.create_plants(data)
+
+
 
 @router.put("/{plants_info_id}", response={
     200: PlantsInfoOutput,

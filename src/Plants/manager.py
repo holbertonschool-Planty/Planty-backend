@@ -10,7 +10,15 @@ class PlantManager(Manager):
     def create_plant(self, data: PlantsInfoInput):
         self.validate_values([data.temperature, data.light, data.watering])
         plant_obj = self.create(**dict(data))
-        return 201, plant_obj
+        return plant_obj
+
+    def create_plants(self, data: List[PlantsInfoInput]):
+        list_plants = [] 
+        for plant in data:
+            list_plants.append(self.create_plant(plant))
+        return 201, list_plants
+    
+
 
     def update_plant(self, plant_id: UUID, data: PlantsInfoInput):
         self.validate_values([data.temperature, data.light, data.watering])
