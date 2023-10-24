@@ -53,15 +53,3 @@ def update_plant_info(request, plants_info_id: UUID, data: PlantsInfoInput):
 })
 def delete_plant_info(request, plants_info_id: UUID):
     return get_plant_model().objects.delete_plant(plants_info_id)
-
-
-#IS ONLY TO TEST, REMOVE THIS IN FUTURE
-@router.post(
-    "temp_image/",
-    response={
-        200: Dict
-    }
-)
-def upload_image(request, file: UploadedFile):
-    file_url = upload_to_firebase(file)
-    return 200, {"message": f"{file_url}"}
