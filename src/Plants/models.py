@@ -11,4 +11,5 @@ class Plants_info(models.Model):
     temperature = models.PositiveSmallIntegerField()
     light = models.PositiveSmallIntegerField()
     watering = models.PositiveSmallIntegerField()
+    water_frequency = models.PositiveIntegerField(null=True)
     objects = PlantManager()

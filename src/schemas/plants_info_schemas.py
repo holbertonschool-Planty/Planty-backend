@@ -11,6 +11,7 @@ class PlantsInfoOutput(Schema):
     temperature: int
     light: int
     watering: int
+    water_frequency: int
 
 class PlantsInfoInput(Schema):
     scientific_name: Optional[str]
@@ -18,6 +19,7 @@ class PlantsInfoInput(Schema):
     temperature: int
     light: int
     watering: int
+    water_frequency: int
 
     @validator("scientific_name", pre=True, always=True)
     def scientific_name_unique(cls, scientific_name):

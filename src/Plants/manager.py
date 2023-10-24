@@ -8,7 +8,7 @@ from ninja.errors import HttpError
 class PlantManager(Manager):
 
     def create_plant(self, data: PlantsInfoInput):
-        self.validate_values([data.temperature, data.light, data.watering])
+        self.validate_values([data.temperature, data.light, data.watering, data.water_frequency])
         plant_obj = self.create(**dict(data))
         return plant_obj
 
@@ -21,7 +21,7 @@ class PlantManager(Manager):
 
 
     def update_plant(self, plant_id: UUID, data: PlantsInfoInput):
-        self.validate_values([data.temperature, data.light, data.watering])
+        self.validate_values([data.temperature, data.light, data.watering, data.water_frequency])
         plant_obj = get_object_or_404(self.model, id=plant_id)
         plant_obj.station = data.station
         plant_obj.temperature = data.temperature
