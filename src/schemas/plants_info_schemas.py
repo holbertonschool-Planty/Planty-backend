@@ -2,6 +2,7 @@ from ninja import Schema
 from ninja.errors import HttpError
 from pydantic import UUID4, validator
 from utils.models_loads import get_plant_model
+from typing import Optional
 
 class PlantsInfoOutput(Schema):
     id: UUID4
@@ -11,9 +12,8 @@ class PlantsInfoOutput(Schema):
     light: int
     watering: int
 
-
 class PlantsInfoInput(Schema):
-    scientific_name: str
+    scientific_name: Optional[str]
     station: str
     temperature: int
     light: int

@@ -1,8 +1,9 @@
-from ninja import Router
-from src.Plants.schemas.plants_info_schemas import PlantsInfoOutput, PlantsInfoInput
+from ninja import Router, UploadedFile
+from src.schemas.plants_info_schemas import PlantsInfoOutput, PlantsInfoInput
+from utils.firebase_helpers import upload_to_firebase
 from utils.models_loads import get_plant_model
-from django.shortcuts import get_object_or_404
-from typing import Any, Dict, List
+from django.shortcuts import get_object_or_404, get_list_or_404
+from typing import Dict, List
 from src.schemas import schemas
 from uuid import UUID
 
@@ -15,9 +16,7 @@ router = Router(tags=["Plants info"])
     500: schemas.InternalServerErrorResponse
 })
 def plants_info(request):
-    plants_info = get_plant_model().objects.get_list()
-    return plants_info
-
+    return get_list_or_404(get_plant_model())
 
 @router.get("/{plants_info_id}", response={
     200: PlantsInfoOutput,
@@ -54,3 +53,15 @@ def update_plant_info(request, plants_info_id: UUID, data: PlantsInfoInput):
 })
 def delete_plant_info(request, plants_info_id: UUID):
     return get_plant_model().objects.delete_plant(plants_info_id)
+
+
+#IS ONLY TO TEST, REMOVE THIS IN FUTURE
+@router.post(
+    "temp_image/",
+    response={
+        200: Dict
+    }
+)
+def upload_image(request, file: UploadedFile):
+    file_url = upload_to_firebase(file)
+    return 200, {"message": f"{file_url}"}

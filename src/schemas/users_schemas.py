@@ -1,11 +1,13 @@
 from pydantic import validator, UUID4
+from typing import Optional
 from utils.models_loads import get_users_model, get_userPhone_model
 from ninja.orm import create_schema
 from ninja import Schema
 from src.schemas.schemas import CustomBadRequest
+from typing import Optional
 
 class UserInput(Schema):
-    name: str = None
+    name: Optional[str]
     email: str 
     password: str
 
@@ -22,9 +24,10 @@ class UserInput(Schema):
         return password
     
 class UserLogin(Schema):
-    name: str = None
+    name: Optional[str]
     email: str 
-    password: str = None
+    password: str
+
 
     @validator("email", pre=True, always=True)
     def email_must_be_exist(cls, email):
@@ -36,8 +39,7 @@ class UserOutput(Schema):
     id: UUID4
     name: str
     email: str
-    token: UUID4 = None
-
+    token: Optional[UUID4]
 
 
 class UserPhoneInput(Schema):
@@ -48,4 +50,16 @@ class UserPhoneOutput(Schema):
     id: UUID4
     user: UserOutput
     token: str
+
+class PhoneEventOutput(Schema):
+    id: UUID4
+    user_phone: UserPhoneOutput
+    frequency: int
+    event_type: str
+    message: str
+
+class PhoneEventInput(Schema):
+    frequency: int
+    event_type: str
+    message: str
 

@@ -1,12 +1,13 @@
 from src.schemas.schemas import CustomBadRequest
-from utils.models_loads import get_usersToken_model, get_userPhone_model, get_users_model
-from django.shortcuts import get_object_or_404
+from utils.models_loads import get_phoneEvent_model, get_usersToken_model, get_userPhone_model, get_users_model
+from django.shortcuts import get_list_or_404, get_object_or_404
 from django.contrib.auth import authenticate
 from uuid import UUID
 from django.db.models import QuerySet
+from typing import List
 from src.schemas import users_schemas
 from django.contrib.auth.models import BaseUserManager
-from src.base.manager import BaseManager
+from django.db.models import manager
 
 
 class UsersManager(BaseUserManager):
@@ -24,7 +25,7 @@ class UsersManager(BaseUserManager):
 
     def register_user(self, data: dict):
         user_obj = self.create_user(**data)
-        return 201, self.create_schema(user_obj)
+        return 201, user_obj
    
     def login_user(self, data: users_schemas.UserLogin):
         user = authenticate(email=data.email, password=data.password)
@@ -38,7 +39,7 @@ class UsersManager(BaseUserManager):
         user_obj = get_object_or_404(self.model, id=users_id)
         user_obj.name = data.name
         user_obj.save()
-        return 200, self.create_schema(user_obj)
+        return 200, user_obj
 
     def delete_user(self, users_id: UUID):
         user_obj = get_object_or_404(self.model, id=users_id)
@@ -52,7 +53,7 @@ class UsersManager(BaseUserManager):
             email=user_obj.email,
             token=user_token)
 
-class UsersPhoneManager(BaseManager):
+class UsersPhoneManager(manager.Manager):
 
     def get_tokens_by_user(self, users_id: UUID):
         user_obj = get_object_or_404(get_users_model(), id=users_id)
@@ -64,20 +65,41 @@ class UsersPhoneManager(BaseManager):
 
     def save_token(self, users_id: UUID, user_phone_token: str):
         user_obj = get_object_or_404(get_users_model(), id=users_id)
-        if get_userPhone_model().objects.filter(users_id=users_id, token=user_phone_token).exists():
+        if get_userPhone_model().objects.filter(user_id=users_id, token=user_phone_token).exists():
             raise CustomBadRequest(f"Token of the user {user_obj.name} already exists.")
-        userPhone_obj = self.model(users_id=user_obj, token=user_phone_token)
+        userPhone_obj = self.model(user=user_obj, token=user_phone_token)
         userPhone_obj.save()
-        return 201, self.create_schema(user_obj, userPhone_obj)
+        return 201, userPhone_obj
     
     def delete_token(self, users_id: UUID, user_phone_token: str):
-        userPhone_obj = get_object_or_404(get_userPhone_model(), users_id=users_id, token=user_phone_token)
+        userPhone_obj = get_object_or_404(get_userPhone_model(), user_id=users_id, token=user_phone_token)
         userPhone_obj.delete()
         return 200, {"message": "User deleted succesfully"}
 
-    def create_schema(self, user_obj: users_schemas.UserInput, userPhone_obj: users_schemas.UserPhoneInput):
-        return users_schemas.UserPhoneOutput(
-            id=userPhone_obj.id,
-            user=get_users_model().objects.create_schema(user_obj),
-            token=userPhone_obj.token
-        )
+
+
+
+class PhoneEventManager(manager.Manager):
+
+    def create_event(self, userPhone_obj: users_schemas.UserPhoneOutput, data: dict ) -> users_schemas.PhoneEventOutput:
+        data["user_phone"] = userPhone_obj
+        phoneEvent_obj = self.create(**data)
+        return phoneEvent_obj
+    
+    def delete_event(self, phoneEvent_obj: users_schemas.PhoneEventOutput):
+        phoneEvent_obj.delete()
+        return {"message": "User deleted succesfully"}
+
+    def create_events(self, list_eventPhone: List[users_schemas.PhoneEventInput], userPhone_obj: users_schemas.UserPhoneOutput) -> List[users_schemas.PhoneEventOutput]:
+        list_events = [] 
+        for event in list_eventPhone:
+            list_events.append(self.create_event(userPhone_obj, dict(event)))
+        return list_events
+
+    def delete_events(self, users_id: UUID, user_phone_token: str):
+        userPhone_obj = get_object_or_404(get_userPhone_model(), user_id=users_id, token=user_phone_token)
+        list_events = get_list_or_404(get_phoneEvent_model(), user_phone=userPhone_obj)
+        list_events_removed = []
+        for event in list_events:
+            list_events_removed.append(self.delete_event(event))
+        return 200, list_events_removed
