@@ -12,5 +12,5 @@ class Planty(models.Model):
     actual_temperature = ArrayField(base_field=models.PositiveSmallIntegerField())
     actual_light = ArrayField(base_field=models.PositiveSmallIntegerField())
     actual_watering = ArrayField(base_field=models.PositiveSmallIntegerField())
-    plants_info = models.ForeignKey(Plants_info, on_delete=models.CASCADE)
+    plants_info = models.ForeignKey(Plants_info, on_delete=models.CASCADE, blank=True, null=True)
     objects = DeviceManager()

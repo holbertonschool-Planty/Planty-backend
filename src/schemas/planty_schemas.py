@@ -11,17 +11,17 @@ class PlantyOutput(Schema):
 	actual_temperature: List[int]
 	actual_light: List[int]
 	actual_watering: List[int]
-	plants_info: PlantsInfoOutput
+	plants_info: Optional[PlantsInfoOutput]
   
 class PlantyInput(Schema):
 	serie: Optional[str]
 	actual_temperature: int
 	actual_light: int
 	actual_watering: int
-	plants_info_id: Optional[UUID4]
+	plants_info_id: Optional[UUID4] = None
   
 	@validator("serie", pre=True, always=True)
 	def serie_unique(cls, serie):
 		if get_planty_model().objects.filter(serie=serie).exists():
-			raise HttpError(409, f'User already linked to the specified device.')
+			raise HttpError(409, f'Specified device already exists.')
 		return serie
