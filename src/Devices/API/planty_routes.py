@@ -12,7 +12,7 @@ router = Router(tags=["Planty"])
     201: PlantyOutput,
     400: schemas.BadRequestResponse,
     404: schemas.NotFoundResponse,
-    409: UUID,
+    409: PlantyOutput,
     500: schemas.InternalServerErrorResponse
 })
 def add_planty(request, data: PlantyInput):
