@@ -17,7 +17,7 @@ class DeviceManager(Manager):
         data['actual_light'] = [data.get('actual_light')]
         data['actual_watering'] = [data.get('actual_watering')]
         planty_obj = self.create(**data)
-        return 201, planty_obj.id
+        return 201, planty_obj
 
     def delete_planty(self, planty_id: UUID):
         planty_obj = get_object_or_404(self.model, id=planty_id)
