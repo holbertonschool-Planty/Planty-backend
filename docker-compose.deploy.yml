@@ -4,7 +4,7 @@ services:
   planty_be:
     image: ${GHCR_IMAGE}
     container_name: planty_be
-    command: bash -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8080"
+    command: bash -c "python manage.py makemigrations Users && python manage.py makemigrations && python manage.py migrate && python manage.py runserver 0.0.0.0:8080"
     ports:
       - "8080:8080"
     networks:
