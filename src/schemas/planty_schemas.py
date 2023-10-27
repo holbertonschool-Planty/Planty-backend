@@ -9,6 +9,7 @@ from typing import List, Optional
 class PlantyOutput(Schema):
 	id: UUID4
 	serie: str
+	timezone: int
 	actual_temperature: List[int]
 	actual_light: List[int]
 	actual_watering: List[int]
@@ -16,6 +17,7 @@ class PlantyOutput(Schema):
   
 class PlantyInput(Schema):
 	serie: Optional[str]
+	timezone: int
 	actual_temperature: int
 	actual_light: int
 	actual_watering: int

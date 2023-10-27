@@ -9,8 +9,10 @@ from uuid import uuid4
 class Planty(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid4, editable=False)
     serie = models.CharField(unique=True)
+    timezone = models.IntegerField()
     actual_temperature = ArrayField(base_field=models.PositiveSmallIntegerField())
     actual_light = ArrayField(base_field=models.PositiveSmallIntegerField())
     actual_watering = ArrayField(base_field=models.PositiveSmallIntegerField())
     plants_info = models.ForeignKey(Plants_info, on_delete=models.CASCADE, blank=True, null=True)
+
     objects = DeviceManager()
