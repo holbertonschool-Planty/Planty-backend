@@ -24,6 +24,7 @@ class CreationPlantyUserInput(Schema):
     token_phone: Optional[str]
     user_planty: UserPlantyInput
     plants_info_id: Optional[UUID4]
+    timezone: int
     phone_event: Optional[List[PhoneEventInput]]
 
 class CreationPlantyUserOutput(Schema):

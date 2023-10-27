@@ -9,7 +9,7 @@ from uuid import uuid4
 class Planty(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid4, editable=False)
     serie = models.CharField(unique=True)
-    timezone = models.IntegerField()
+    timezone = models.IntegerField(blank=True, null=True)
     actual_temperature = ArrayField(base_field=models.PositiveSmallIntegerField())
     actual_light = ArrayField(base_field=models.PositiveSmallIntegerField())
     actual_watering = ArrayField(base_field=models.PositiveSmallIntegerField())
