@@ -1,5 +1,5 @@
 from ninja import Schema
-from ninja.errrors import HttpError
+from ninja.errors import HttpError
 from pydantic import UUID4
 from typing import List, Optional
 from src.schemas.users_schemas import PhoneEventOutput, UserOutput, PhoneEventInput
