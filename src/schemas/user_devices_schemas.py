@@ -21,12 +21,6 @@ class UserPlantyInput(Schema):
     location: Optional[str]
     image_url: Optional[str]
 
-    @validator("color_card", pre=True, always=True)
-    def color_card_max_length(cls, color_card):
-        if len(color_card) > 7:
-            raise HttpError(400, "Color card must be shorter than 7 characters")
-        return color_card
-
 class CreationPlantyUserInput(Schema):
     token_phone: Optional[str]
     user_planty: UserPlantyInput
