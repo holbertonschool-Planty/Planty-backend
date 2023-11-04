@@ -55,7 +55,6 @@ class UserOutput(Schema):
     token: Optional[UUID4]
 
 class UserPhoneInput(Schema):
-    users_id: UUID4
     token: str
     
 class UserPhoneOutput(Schema):

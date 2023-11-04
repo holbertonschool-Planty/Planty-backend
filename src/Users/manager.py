@@ -64,11 +64,11 @@ class UsersPhoneManager(manager.Manager):
         token_list = get_list_or_404(self.model, user_id=users_id)
         return 200, token_list
 
-    def save_token(self, users_id: UUID, user_phone_token: str):
+    def save_token(self, users_id: UUID, data: users_schemas.UserPhoneInput):
         user_obj = get_object_or_404(get_users_model(), id=users_id)
-        if get_userPhone_model().objects.filter(user_id=users_id, token=user_phone_token).exists():
+        if get_userPhone_model().objects.filter(user_id=users_id, token=data.token).exists():
             raise CustomBadRequest(f"Token of the user {user_obj.name} already exists.")
-        userPhone_obj = self.model(user=user_obj, token=user_phone_token)
+        userPhone_obj = self.model(user=user_obj, token=data.token)
         userPhone_obj.save()
         return 201, userPhone_obj
     
