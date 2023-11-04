@@ -1,8 +1,10 @@
 from ninja import Schema
+from ninja.errors import HttpError
 from pydantic import UUID4
 from typing import List, Optional
 from src.schemas.users_schemas import PhoneEventOutput, UserOutput, PhoneEventInput
 from src.schemas.planty_schemas import PlantyOutput
+from pydantic import validator
 
 class UserPlantyOutput(Schema):
     id: UUID4
@@ -12,7 +14,6 @@ class UserPlantyOutput(Schema):
     color_card: str
     user: UserOutput
     planty: PlantyOutput
-
 
 class UserPlantyInput(Schema):
     plant_name: str
