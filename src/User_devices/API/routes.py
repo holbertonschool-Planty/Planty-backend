@@ -37,15 +37,21 @@ def get_planty_of_user(request, users_id: UUID, planty_id: UUID):
     return 200, get_object_or_404(get_userPlanty_model(), user_id=users_id, planty_id=planty_id)
 
 @router.get(
-    "{user_planty_id}/check_values/",
+    "{users_id}/check_values/",
     response={
-    200: List[str],
+    200: List[Dict],
     400: schemas.BadRequestResponse,
     404: schemas.NotFoundResponse,
     500: schemas.InternalServerErrorResponse
 })
-def check_values_of_planty(request, user_planty_id: UUID):
-    return 200, get_userPlanty_model().objects.check_values_of_planty(user_planty_id)
+def check_values_of_planty(request, users_id: UUID):
+    list_planties_by_user = get_list_or_404(get_userPlanty_model(), user_id=users_id)
+    filter_list = []
+    alert_id = 1
+    for user_planty in list_planties_by_user:
+        alert_planty, alert_id = get_userPlanty_model().objects.check_values_of_planty(user_planty.id, alert_id)
+        filter_list = filter_list + alert_planty
+    return 200, filter_list
 
 @router.post(
     "{users_id}/planty/{planty_id}",
