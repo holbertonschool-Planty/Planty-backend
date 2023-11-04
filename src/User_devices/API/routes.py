@@ -36,6 +36,16 @@ def get_planties_by_user(request, users_id: UUID):
 def get_planty_of_user(request, users_id: UUID, planty_id: UUID):
     return 200, get_object_or_404(get_userPlanty_model(), user_id=users_id, planty_id=planty_id)
 
+@router.get(
+    "{user_planty_id}/check_values/",
+    response={
+    200: List[str],
+    400: schemas.BadRequestResponse,
+    404: schemas.NotFoundResponse,
+    500: schemas.InternalServerErrorResponse
+})
+def check_values_of_planty(request, user_planty_id: UUID):
+    return 200, get_userPlanty_model().objects.check_values_of_planty(user_planty_id)
 
 @router.post(
     "{users_id}/planty/{planty_id}",

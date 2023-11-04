@@ -45,3 +45,21 @@ class UserPlantyManager(Manager):
         userPlanty_obj = get_object_or_404(self.model, id=user_planty_id)
         userPlanty_obj.delete()
         return 200, {"message": "Deleted sucesfully"}
+    
+    def check_values_of_planty(self, user_planty_id: UUID):
+        userPlanty_obj = get_object_or_404(self.model, id=user_planty_id)
+        plantyObj = userPlanty_obj.planty
+        alerts = []
+        if plantyObj.actual_temperature[-1] > plantyObj.plants_info.temperature + 10:
+            alerts.append("The temperature is too high")
+        elif plantyObj.actual_temperature[-1] < plantyObj.plants_info.temperature - 10:
+            alerts.append("The temperature is too low")
+        if plantyObj.actual_light[-1] > plantyObj.plants_info.light + 10:
+            alerts.append("The plant needs less light")
+        elif plantyObj.actual_light[-1] < plantyObj.plants_info.light - 10:
+            alerts.append("The plant needs more light")
+        if plantyObj.actual_watering[-1] > plantyObj.plants_info.watering + 10:
+            alerts.append("The plant needs less watering")
+        elif plantyObj.actual_watering[-1] < plantyObj.plants_info.watering - 10:
+            alerts.append("The plant needs more watering")
+        return alerts
