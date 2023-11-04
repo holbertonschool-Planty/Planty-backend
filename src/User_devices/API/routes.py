@@ -49,7 +49,7 @@ def get_planty_of_user(request, users_id: UUID, planty_id: UUID):
 def add_planty_by_user(request, users_id: UUID, planty_id: UUID, data: CreationPlantyUserInput, file: UploadedFile = None):
     userPhone_obj = get_object_or_404(get_userPhone_model(), user_id=users_id, token=data.token_phone)
     response_notifications = []
-    get_planty_model().objects.update_plant_of_planty(planty_id, data.plants_info_id)
+    get_planty_model().objects.update_plant_of_planty(planty_id, data.plants_info_id, data.timezone)
     response_userplanty = get_userPlanty_model().objects.create_planty_user(users_id, planty_id, dict(data.user_planty), file)
     if data.phone_event:
         response_notifications = get_phoneEvent_model().objects.create_events(data.phone_event, userPhone_obj)

@@ -17,7 +17,7 @@ class DeviceManager(Manager):
         data['actual_light'] = [data.get('actual_light')]
         data['actual_watering'] = [data.get('actual_watering')]
         planty_obj = self.create(**data)
-        return 201, planty_obj.id
+        return 201, planty_obj
 
     def delete_planty(self, planty_id: UUID):
         planty_obj = get_object_or_404(self.model, id=planty_id)
@@ -33,10 +33,11 @@ class DeviceManager(Manager):
         return 200, planty_obj
 
 
-    def update_plant_of_planty(self, planty_id: UUID, plants_info_id: UUID):
+    def update_plant_of_planty(self, planty_id: UUID, plants_info_id: UUID, timezone: int):
         planty_obj = get_object_or_404(self.model, id=planty_id)
         plant_info_obj = get_object_or_404(get_plant_model(), id=plants_info_id)
         setattr(planty_obj, "plants_info", plant_info_obj)
+        setattr(planty_obj, "timezone", timezone)
         planty_obj.save()
         return planty_obj
 
