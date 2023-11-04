@@ -4,7 +4,7 @@ from utils.models_loads import get_phoneEvent_model
 from .celery import app
 import requests
 from datetime import datetime, timedelta
-
+from django.forms.models import model_to_dict
 
 
 
@@ -13,9 +13,10 @@ def manage_notifications():
     list_responses = []
     list_notifications = get_phoneEvent_model().objects.all()
     for notification in list_notifications:
-        if (notification.last_event_date + timedelta(days=notification.frequency - 1)).date() == datetime.today().date():
+        if (notification.last_event_date + timedelta(days=notification.frequency - 1)) == datetime.today().date():
+            notification_dict = model_to_dict(notification)
             status = send_notifications(expo_token=notification.user_phone.token, title=notification.event_type, body=notification.message)
-            list_responses.append({"event": notification, "response": status})
+            list_responses.append({"event": notification_dict, "response": status})
             if status == 200:
                 notification.last_event_date = notification.last_event_date + timedelta(days=notification.frequency).date()
                 notification.save()
@@ -29,6 +30,7 @@ def manage_status_plants():
 
 
 def send_notifications(expo_token: str, title: str, body: str):
+    print("A")
     url = "https://exp.host/--/api/v2/push/send"
     headers = {
         "host": "exp.host",
