@@ -2,7 +2,7 @@ from typing import Dict
 from ninja import Router
 from uuid import UUID
 from utils.authentication import TokenAuth
-from utils.models_loads import get_users_model
+from utils.models_loads import get_users_model, get_usersToken_model
 from django.shortcuts import get_object_or_404
 from src.schemas import users_schemas, schemas
 
@@ -73,3 +73,21 @@ def update_object_users(request, users_id: UUID, data:users_schemas.UserInput):
 def delete_object_users(request, users_id: UUID):
     return get_users_model().objects.delete_user(users_id)
 
+
+
+@router.post(
+    "login/{token_id}",
+    response={
+        200: Dict,
+        400: schemas.BadRequestResponse,
+        401: Dict,
+        404: schemas.NotFoundResponse,
+        500: schemas.InternalServerErrorResponse
+    }
+)
+def check_login(request, token_id: UUID):
+    user_token = get_usersToken_model().objects.filter(token=token_id).first()
+    if user_token:
+        return 200, {"message": "Successful authentication"}
+    else:
+        return 401, {"message": "Failed authentication"}
