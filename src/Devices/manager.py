@@ -45,6 +45,6 @@ class DeviceManager(Manager):
         if new_data < 0:
             raise HttpError(400, 'The value must be positive')
         list.append(new_data)
-        if len(list) > 10:
+        if len(list) > 12:
             list.pop(0)
         return list

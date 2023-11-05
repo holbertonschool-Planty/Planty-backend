@@ -36,7 +36,7 @@ def get_phone_by_user(request, users_id: UUID, user_phone_token: str):
 
 
 @router.post(
-    "{user_phone_token}",
+    "",
     response={
         201: users_schemas.UserPhoneOutput,
         400: schemas.BadRequestResponse,
@@ -44,8 +44,8 @@ def get_phone_by_user(request, users_id: UUID, user_phone_token: str):
         500: schemas.InternalServerErrorResponse
     }
 )
-def create_phone_token_by_user(request, users_id: UUID, user_phone_token: str):
-    return get_userPhone_model().objects.save_token(users_id, user_phone_token)
+def create_phone_token_by_user(request, users_id: UUID, data: users_schemas.UserPhoneInput):
+    return get_userPhone_model().objects.save_token(users_id, data)
 
 
 @router.delete(

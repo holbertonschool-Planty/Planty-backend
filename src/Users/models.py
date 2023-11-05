@@ -24,7 +24,6 @@ class UserToken(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
 
-
 class UserPhone(models.Model):
     id = models.UUIDField(default=uuid.uuid4, primary_key=True, editable=False)
     user = models.ForeignKey(Users, on_delete=models.CASCADE)
