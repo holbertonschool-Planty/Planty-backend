@@ -33,7 +33,9 @@ Once the service is up, you can access the API at **http://localhost:8080**.
 
 ## API
 
-### Plants information endpoints
+<details>
+<summary><b>Plants Information Endpoints</b></summary>
+
 
 **Endpoint:** `/plants_info`
 
@@ -299,7 +301,12 @@ Deletes a plant's details using its plants_info_id.
 }
 ```
 
-### Planty endpoints
+</details>
+
+
+<details>
+<summary><b>Planty Endpoints</b></summary>
+
 
 **Endpoint:** `/planty/{planty_id}`
 
@@ -508,7 +515,11 @@ Deletes a planty specified by its planty_id.
 }
 ```
 
-### Users endpoints
+</details>
+
+<details>
+<summary><b>Users Endpoints</b></summary>
+
 
 **Endpoint:** `/users/{users_id}`
 
@@ -697,7 +708,11 @@ Deletes a user using its users_id.
 }
 ```
 
-### Users Phone Token endpoints
+</details>
+
+<details>
+<summary><b>Users Phone Token Endpoints</b></summary>
+
 
 **Endpoint:** `/users/{users_id}/token`
 
@@ -995,6 +1010,8 @@ Deletes the events for the specified user.
     "detail": "Not Found: No UserPhone matches the given query."
 }
 ```
+
+</details>
 
 
 
