@@ -1,5 +1,5 @@
 from django.db.models import Manager
-from uuid import UUID
+from uuid import UUID, uuid4
 from django.shortcuts import get_object_or_404
 from utils.models_loads import get_plant_model
 from src.schemas.planty_schemas import PlantyInput, PlantyOutput
@@ -41,6 +41,27 @@ class DeviceManager(Manager):
         planty_obj.save()
         return planty_obj
 
+    def create_empty_planty(self, plants_info_id: UUID, timezone: int):
+        data = {}
+        plant_info_obj = get_object_or_404(get_plant_model(), id=plants_info_id)
+        data["plants_info"] = plant_info_obj
+        data["timezone"] = timezone
+        data["serie"] = uuid4()
+        data["actual_temperature"] = self.create_list_twelve(plant_info_obj.temperature)
+        data["actual_light"] = self.create_list_twelve(plant_info_obj.light)
+        data["actual_watering"] = self.create_list_twelve(plant_info_obj.watering)
+        planty_obj_id = self.create(**data)
+        print(planty_obj_id)
+        return planty_obj_id.id
+
+
+
+    def create_list_twelve(self, number):
+        sensor_list = []
+        for _ in range(0, 12):
+            sensor_list.append(number)
+        return sensor_list
+    
     def update_list(self, list, new_data):
         if new_data < 0:
             raise HttpError(400, 'The value must be positive')
