@@ -1014,6 +1014,379 @@ Deletes the events for the specified user.
 </details>
 
 
+<details>
+<summary><b>Planty of Users Endpoints</b></summary>
+
+
+**Endpoint:** `/users_planty/{users_id}`
+
+**Method:** `GET`
+
+**Description:**
+Retrieves a list of all the planty devices linked to the specified user.
+
+**Parameters:** 
+- `users_id` (UUID): Unique identifier for a user.
+
+**Possible status codes:**
+
+    200 OK: Successfully retrieved the list of devices linked to the user.
+    404 Not Found: No planty devices found for the provided `users_id`.
+    500 Internal Server Error: Server error during the operation.
+
+**Responses:**
+
+    200 OK:
+```json
+[
+    {
+        "id": "b87f4a57-17a0-44c2-a58b-894241512091",
+        "plant_name": "Dante",
+        "image_url": "firebase_url_image",
+        "location": "Kitchen",
+        "color_card": "#38CE61",
+        "user": {
+            "id": "a0c1eecf-b417-4b3c-a7e0-eced4ab5e73d",
+            "name": "John",
+            "email": "johndoe@email.com",
+            "token": null
+        },
+        "planty": {
+            "id": "f60e53b4-a776-4d24-96c5-6e2164b5c9e3",
+            "serie": "123abc",
+            "timezone": 0,
+            "actual_temperature": [
+                0
+            ],
+            "actual_light": [
+                0
+            ],
+            "actual_watering": [
+                0
+            ],
+            "plants_info": {
+                "id": "b4155bcf-db9e-445e-bb9c-86bbb03ec2cd",
+                "scientific_name": "Plantago major",
+                "station": "Indoor",
+                "temperature": 22,
+                "light": 80,
+                "watering": 3,
+                "water_frequency": 3
+            }
+        }
+    },
+    ...
+]
+```
+
+    404: Not Found:
+```json
+{
+    "detail": "Not Found: No Users_planty matches the given query."
+}
+```
+
+**Endpoint:** `/users_planty/{users_id}/planty/{planty_id}`
+
+**Method:** `GET`
+
+**Description:**
+Retrieves details of a specific planty device linked to a user.
+
+**Parameters:** 
+- `users_id` (UUID): Unique identifier for a user.
+- `planty_id` (UUID): Unique identifier for a planty device.
+
+**Possible status codes:**
+
+    200 OK: Successfully retrieved the details of the specified planty device linked to the user.
+    404 Not Found: No planty device found for the provided `users_id` and `planty_id`.
+    500 Internal Server Error: Server error during the operation.
+
+**Responses:**
+
+    200 OK:
+```json
+{
+    "id": "b87f4a57-17a0-44c2-a58b-894241512091",
+    "plant_name": "Dante",
+    "image_url": "firebase_url_image",
+    "location": "Kitchen",
+    "color_card": "#38CE61",
+    "user": {
+        "id": "a0c1eecf-b417-4b3c-a7e0-eced4ab5e73d",
+        "name": "John",
+        "email": "johndoe@email.com",
+        "token": null
+    },
+    "planty": {
+        "id": "f60e53b4-a776-4d24-96c5-6e2164b5c9e3",
+        "serie": "123abc",
+        "timezone": 0,
+        "actual_temperature": [
+            0
+        ],
+        "actual_light": [
+            0
+        ],
+        "actual_watering": [
+            0
+        ],
+        "plants_info": {
+            "id": "b4155bcf-db9e-445e-bb9c-86bbb03ec2cd",
+            "scientific_name": "Plantago major",
+            "station": "Indoor",
+            "temperature": 22,
+            "light": 80,
+            "watering": 3,
+            "water_frequency": 3
+        }
+    }
+}
+```
+
+    404: Not Found:
+```json
+{
+    "detail": "Not Found: No Users_planty matches the given query."
+}
+```
+
+**Endpoint:** `/users_planty/{users_id}/planty/{planty_id}`
+
+**Method:** `POST`
+
+**Description:**
+Creates a new relationship between a user and a planty device with specified details.
+
+**Parameters:** 
+- `users_id` (UUID): Unique identifier for a user.
+- `planty_id` (UUID): Unique identifier for a planty device.
+
+**Possible status codes:**
+
+    201 Created: Successfully created the relationship and retrieved details of the specified planty device linked to the user.
+    400 Bad Request: Invalid input data.
+    404 Not Found: No planty device or user found for the provided `users_id` or `planty_id`.
+    500 Internal Server Error: Server error during the operation.
+
+**Payload:**
+```json
+{
+    "token_phone": "string",
+    "user_planty": {
+        "plant_name": "string",
+        "color_card": "string",
+        "location": "string",
+        "image_url": "string"
+    },
+    "plants_info_id": "string",
+    "timezone": 0,
+    "phone_event": [
+        {
+            "frequency": 0,
+            "event_type": "string",
+            "message": "string"
+        }
+    ]
+}
+```
+
+**Responses:**
+
+    201 Created:
+```json
+{
+    "user_planty": {
+        "id": "b87f4a57-17a0-44c2-a58b-894241512091",
+        "plant_name": "Dante",
+        "image_url": "firebase_url_image",
+        "location": "Kitchen",
+        "color_card": "#38CE61",
+        "user": {
+            "id": "a0c1eecf-b417-4b3c-a7e0-eced4ab5e73d",
+            "name": "John",
+            "email": "johndoe@email.com",
+            "token": null
+        },
+        "planty": {
+            "id": "f60e53b4-a776-4d24-96c5-6e2164b5c9e3",
+            "serie": "123abc",
+            "timezone": 0,
+            "actual_temperature": [
+                0
+            ],
+            "actual_light": [
+                0
+            ],
+            "actual_watering": [
+                0
+            ],
+            "plants_info": {
+                "id": "b4155bcf-db9e-445e-bb9c-86bbb03ec2cd",
+                "scientific_name": "Plantago major",
+                "station": "Indoor",
+                "temperature": 22,
+                "light": 80,
+                "watering": 3,
+                "water_frequency": 3
+            }
+        }
+    },
+    "phone_events": [
+        {
+            "id": "d7167893-f5aa-4ffc-84e0-adb14518734f",
+            "user_phone": {
+                "id": "9a39d69a-2d7e-4b82-9f9c-b1bd2600020a",
+                "user": {
+                    "id": "a0c1eecf-b417-4b3c-a7e0-eced4ab5e73d",
+                    "name": "John",
+                    "email": "johndoe@email.com",
+                    "token": null
+                },
+                "token": "phone_token"
+            },
+            "last_event_date": "2023-10-12",
+            "frequency": 2,
+            "event_type": "TYPE_1",
+            "message": "Watering plants"
+        }
+    ]
+}
+```
+
+    404: Not Found:
+```json
+{
+    "detail": "Not Found: No UserPhone matches the given query."
+}
+```
+
+**Endpoint:** `/users_planty/{user_planty_id}`
+
+**Method:** `PUT`
+
+**Description:**
+Updates the details of a user-planty relationship with the specified ID.
+
+**Parameters:** 
+- `user_planty_id` (UUID): Unique identifier for a user-planty relationship.
+
+**Possible status codes:**
+
+    200 OK: Successfully updated the details of the specified user-planty relationship and retrieved the updated information.
+    400 Bad Request: Invalid input data.
+    404 Not Found: No user-planty relationship found for the provided `user_planty_id`.
+    500 Internal Server Error: Server error during the operation.
+
+**Payload:**
+```json
+{
+    "token_phone": "string",
+    "user_planty": {
+        "plant_name": "string",
+        "color_card": "string",
+        "location": "string",
+        "image_url": "string"
+    },
+    "plants_info_id": "string",
+    "timezone": 0,
+    "phone_event": [
+        {
+            "frequency": 0,
+            "event_type": "string",
+            "message": "string"
+        }
+    ]
+}
+```
+
+**Responses:**
+
+    200 OK:
+```json
+{
+    "id": "b87f4a57-17a0-44c2-a58b-894241512091",
+    "plant_name": "Maripili",
+    "image_url": "firebase_url_image",
+    "location": "Living Room",
+    "color_card": "#2f31a3",
+    "user": {
+        "id": "a0c1eecf-b417-4b3c-a7e0-eced4ab5e73d",
+        "name": "John",
+        "email": "johndoe@email.com",
+        "token": null
+    },
+    "planty": {
+        "id": "f60e53b4-a776-4d24-96c5-6e2164b5c9e3",
+        "serie": "123abc",
+        "timezone": 0,
+        "actual_temperature": [
+            0
+        ],
+        "actual_light": [
+            0
+        ],
+        "actual_watering": [
+            0
+        ],
+        "plants_info": {
+            "id": "b4155bcf-db9e-445e-bb9c-86bbb03ec2cd",
+            "scientific_name": "Plantago major",
+            "station": "Indoor",
+            "temperature": 22,
+            "light": 80,
+            "watering": 3,
+            "water_frequency": 3
+        }
+    }
+}
+```
+
+    404: Not Found:
+```json
+{
+    "detail": "Not Found: No Users_planty matches the given query."
+}
+```
+
+**Endpoint:** `/users_planty/{user_planty_id}`
+
+**Method:** `DELETE`
+
+**Description:**
+Deletes a user-planty relationship with the specified ID.
+
+**Parameters:** 
+- `user_planty_id` (UUID): Unique identifier for a user-planty relationship.
+
+**Possible status codes:**
+
+    200 OK: Successfully deleted the specified user-planty relationship.
+    400 Bad Request: Invalid input data.
+    404 Not Found: No user-planty relationship found for the provided `user_planty_id`.
+    500 Internal Server Error: Server error during the operation.
+
+**Responses:**
+
+    200 OK:
+```json
+{
+    "message": "Deleted sucesfully"
+}
+```
+
+    404: Not Found:
+```json
+{
+    "detail": "Not Found: No Users_planty matches the given query."
+}
+```
+
+
+</details>
+
+
 
 ## Creators:
 ### [Facundo Alvarez](https://www.linkedin.com/in/facundo-alvarez4/)   <a href="https://github.com/Faqu22"><img align="center" alt="github" src="https://i.imgur.com/hGwhvpO.png" height="25"/></a>
