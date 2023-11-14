@@ -74,15 +74,3 @@ class PhoneEventInput(Schema):
     frequency: int
     event_type: str
     message: str
-
-    @validator("message", pre=True, always=True)
-    def message_max_length(cls, message):
-        if len(message) > 100:
-            raise CustomBadRequest("Message must be shorter than 100 characters")
-        return message
-    
-    @validator("event_type", pre=True, always=True)
-    def event_type_max_length(cls, event_type):
-        if len(event_type) > 10:
-            raise CustomBadRequest("Event Type must be shorter than 10 characters")
-        return event_type
