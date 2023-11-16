@@ -74,7 +74,7 @@ def create_event(request, users_id: UUID, user_phone_token: str, data: users_sch
     return 201, get_phoneEvent_model().objects.create_event(userPhone_obj, dict(data))
 
 @router.get(
-        "notifications",
+        "{user_phone_token}/notifications/",
         response={
             200: List[users_schemas.PhoneEventOutput],
             400: schemas.BadRequestResponse,
@@ -82,8 +82,8 @@ def create_event(request, users_id: UUID, user_phone_token: str, data: users_sch
             500: schemas.InternalServerErrorResponse
         }
 )
-def get_events_list_by_user(request, users_id: UUID,  data: users_schemas.UserPhoneInput):
-    userPhone_obj = get_object_or_404(get_userPhone_model(), user_id=users_id, token=data.token)
+def get_events_list_by_user(request, users_id: UUID, user_phone_token: str):
+    userPhone_obj = get_object_or_404(get_userPhone_model(), user_id=users_id, token=user_phone_token)
     return 200, get_list_or_404(get_phoneEvent_model(), user_phone_id=userPhone_obj.id)
     
 @router.delete(
