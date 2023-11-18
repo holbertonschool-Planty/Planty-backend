@@ -4,7 +4,7 @@ from uuid import UUID
 from utils.authentication import TokenAuth
 from utils.models_loads import get_users_model, get_userPhone_model, get_phoneEvent_model
 from django.shortcuts import get_list_or_404, get_object_or_404
-from src.schemas import users_schemas, schemas
+from src.schemas import users_schemas, schemas, phone_event_schemas
 
 router = Router(tags=["Users Phone Token"])
 
@@ -63,20 +63,20 @@ def delete_phone_token_by_user(request, users_id: UUID, user_phone_token: str):
 @router.post(
     "{user_phone_token}/notifications",
     response={
-        201: users_schemas.PhoneEventOutput,
+        201: phone_event_schemas.PhoneEventOutput,
         400: schemas.BadRequestResponse,
         404: schemas.NotFoundResponse,
         500: schemas.InternalServerErrorResponse
     }   
 )
-def create_event(request, users_id: UUID, user_phone_token: str, data: users_schemas.PhoneEventInput):
+def create_event(request, users_id: UUID, user_phone_token: str, data: phone_event_schemas.PhoneEventInput):
     userPhone_obj = get_object_or_404(get_userPhone_model(), user_id=users_id, token=user_phone_token)
     return 201, get_phoneEvent_model().objects.create_event(userPhone_obj, dict(data))
 
 @router.get(
         "{user_phone_token}/notifications",
         response={
-            200: List[users_schemas.PhoneEventOutput],
+            200: List[phone_event_schemas.PhoneEventOutput],
             400: schemas.BadRequestResponse,
             404: schemas.NotFoundResponse,
             500: schemas.InternalServerErrorResponse
