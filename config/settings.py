@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.sitemaps',
     "corsheaders",
     "src.Plants",
     "src.Users",
@@ -161,7 +162,7 @@ CELERY_BEAT_SCHEDULE = {
     },
     "manage_status_plants": {
         "task": "manage_status_plants",
-        "schedule": timedelta(hours=4)
+        "schedule": timedelta(minutes=30)
     }
 }
 

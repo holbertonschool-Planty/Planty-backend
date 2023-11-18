@@ -9,13 +9,15 @@ from src.User_devices.API.routes import router as userplanty_router
 from src.schemas.schemas import CustomBadRequest
 from src.schemas.schemas import BadRequestResponse 
 from .firebase_config import initialize_firebase
+from django.contrib.sitemaps.views import sitemap
+from .sitemaps import APISitemap
 
 initialize_firebase()
 
 api = NinjaAPI(
     title="Planty",
     description="Backend of Planty",
-    auth=None,
+    auth="Facundo Alvarez - Gabriel Acosta",
 )
 
 @api.exception_handler(CustomBadRequest)
@@ -29,7 +31,12 @@ api.add_router("users_planty", userplanty_router)
 api.add_router("plants_info", plants_info_router)
 api.add_router("planty", planty_router)
 
+sitemaps = {
+    'api': APISitemap,
+}
+
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path("api/", api.urls)
+    path("api/", api.urls),
+    path('sitemap.xml', sitemap, {'sitemaps': sitemaps}, name='django.contrib.sitemaps.views.sitemap')
 ]

@@ -1,2 +1,4 @@
 User-agent: *
 Allow: /
+Sitemap: https://api.plantyit.tech/sitemap.xml
+Disallow: /admin/
