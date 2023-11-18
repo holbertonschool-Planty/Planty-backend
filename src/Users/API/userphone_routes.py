@@ -2,7 +2,7 @@ from typing import Dict, List
 from ninja import Router
 from uuid import UUID
 from utils.authentication import TokenAuth
-from utils.models_loads import get_users_model, get_userPhone_model, get_phoneEvent_model
+from utils.models_loads import get_users_model, get_userPhone_model, get_phoneEvent_model, get_userPlanty_model
 from django.shortcuts import get_list_or_404, get_object_or_404
 from src.schemas import users_schemas, schemas, phone_event_schemas
 
@@ -74,7 +74,7 @@ def create_event(request, users_id: UUID, user_phone_token: str, data: phone_eve
     return 201, get_phoneEvent_model().objects.create_event(userPhone_obj, dict(data))
 
 @router.get(
-        "{user_phone_token}/notifications/",
+        "/notifications/",
         response={
             200: List[phone_event_schemas.PhoneEventOutput],
             400: schemas.BadRequestResponse,
@@ -82,9 +82,12 @@ def create_event(request, users_id: UUID, user_phone_token: str, data: phone_eve
             500: schemas.InternalServerErrorResponse
         }
 )
-def get_events_list_by_user(request, users_id: UUID, user_phone_token: str):
-    userPhone_obj = get_object_or_404(get_userPhone_model(), user_id=users_id, token=user_phone_token)
-    return 200, get_list_or_404(get_phoneEvent_model(), user_phone_id=userPhone_obj.id)
+def get_events_list_by_user(request, users_id: UUID):
+    user_device_list = get_list_or_404(get_userPlanty_model(), user_id=users_id)
+    response = []
+    for user_device in user_device_list:
+        response.extend(get_list_or_404(get_phoneEvent_model(), user_device_id=user_device.id))
+    return 200, response
     
 @router.delete(
     "{user_phone_token}/notifications",

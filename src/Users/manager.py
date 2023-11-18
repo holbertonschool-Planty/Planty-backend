@@ -5,7 +5,7 @@ from django.contrib.auth import authenticate
 from uuid import UUID
 from django.db.models import QuerySet
 from typing import List
-from src.schemas import users_schemas
+from src.schemas import users_schemas, user_devices_schemas, phone_event_schemas
 from django.contrib.auth.models import BaseUserManager
 from django.db.models import manager
 
@@ -77,24 +77,21 @@ class UsersPhoneManager(manager.Manager):
         userPhone_obj.delete()
         return 200, {"message": "User deleted succesfully"}
 
-
-
-
 class PhoneEventManager(manager.Manager):
 
-    def create_event(self, userPhone_obj: users_schemas.UserPhoneOutput, data: dict ) -> users_schemas.PhoneEventOutput:
-        data["user_phone"] = userPhone_obj
+    def create_event(self, data: dict, userPlanty_obj: user_devices_schemas.UserPlantyOutput ) -> phone_event_schemas.PhoneEventOutput:
+        data["user_device"] = userPlanty_obj
         phoneEvent_obj = self.create(**data)
         return phoneEvent_obj
     
-    def delete_event(self, phoneEvent_obj: users_schemas.PhoneEventOutput):
+    def delete_event(self, phoneEvent_obj: phone_event_schemas.PhoneEventOutput):
         phoneEvent_obj.delete()
         return {"message": "User deleted succesfully"}
 
-    def create_events(self, list_eventPhone: List[users_schemas.PhoneEventInput], userPhone_obj: users_schemas.UserPhoneOutput) -> List[users_schemas.PhoneEventOutput]:
+    def create_events(self, list_eventPhone: List[phone_event_schemas.PhoneEventInput], userPlanty_obj: user_devices_schemas.UserPlantyOutput) -> List[phone_event_schemas.PhoneEventOutput]:
         list_events = [] 
         for event in list_eventPhone:
-            list_events.append(self.create_event(userPhone_obj, dict(event)))
+            list_events.append(self.create_event(dict(event), userPlanty_obj))
         return list_events
 
     def delete_events(self, users_id: UUID, user_phone_token: str):

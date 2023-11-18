@@ -1,9 +1,10 @@
 from ninja import Form, Router
-from src.schemas.user_devices_schemas import CreationPlantyUserOutput, UserPlantyInput, UserPlantyOutput, CreationPlantyUserInput
+from src.schemas.user_devices_schemas import UserPlantyOutput
+from src.schemas.creation_planty_user_schemas import CreationPlantyUserInput, CreationPlantyUserOutput
 from utils.firebase_helpers import upload_to_firebase
 from utils.models_loads import get_userPlanty_model, get_planty_model, get_userPhone_model, get_phoneEvent_model
 from django.shortcuts import get_object_or_404, get_list_or_404
-from typing import Dict, List, Optional
+from typing import Dict, List
 from src.schemas import schemas
 from uuid import UUID
 from ninja import File
@@ -63,7 +64,6 @@ def check_values_of_planty(request, users_id: UUID):
     }
 )
 def add_planty_by_user(request, users_id: UUID, data: CreationPlantyUserInput, file: UploadedFile = None):
-    userPhone_obj = get_object_or_404(get_userPhone_model(), user_id=users_id, token=data.token_phone)
     response_notifications = []
     if not data.planty_id:
         data.planty_id = get_planty_model().objects.create_empty_planty(data.plants_info_id, data.timezone)
@@ -71,8 +71,8 @@ def add_planty_by_user(request, users_id: UUID, data: CreationPlantyUserInput, f
         get_planty_model().objects.update_plant_of_planty(data.planty_id, data.plants_info_id, data.timezone)
     response_userplanty = get_userPlanty_model().objects.create_planty_user(users_id, data.planty_id, dict(data.user_planty), file)
     if data.phone_event:
-        response_notifications = get_phoneEvent_model().objects.create_events(data.phone_event, userPhone_obj)
-    return 201, CreationPlantyUserOutput(user_planty=response_userplanty, phone_events=response_notifications)
+        response_notifications = get_phoneEvent_model().objects.create_events(data.phone_event, response_userplanty)
+    return 201, CreationPlantyUserOutput(user_planty=response_userplanty)
 
 @router.put(
     "{user_planty_id}/",

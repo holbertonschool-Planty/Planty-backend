@@ -17,7 +17,7 @@ initialize_firebase()
 api = NinjaAPI(
     title="Planty",
     description="Backend of Planty",
-    auth="Facundo Alvarez - Gabriel Acosta",
+    auth=None,
 )
 
 @api.exception_handler(CustomBadRequest)

@@ -1,6 +1,5 @@
 from pydantic import validator, UUID4
 from typing import Optional
-from datetime import date
 from utils.models_loads import get_users_model
 from ninja import Schema
 from src.schemas.schemas import CustomBadRequest
@@ -61,16 +60,3 @@ class UserPhoneOutput(Schema):
     id: UUID4
     user: UserOutput
     token: str
-
-class PhoneEventOutput(Schema):
-    id: UUID4
-    user_phone: UserPhoneOutput
-    last_event_date: date
-    frequency: int
-    event_type: str
-    message: str
-
-class PhoneEventInput(Schema):
-    frequency: int
-    event_type: str
-    message: str

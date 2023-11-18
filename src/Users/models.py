@@ -31,8 +31,9 @@ class UserPhone(models.Model):
     objects = UsersPhoneManager()
 
 class UserPhoneEvent(models.Model):
+    from src.User_devices.models import Users_planty
     id = models.UUIDField(default=uuid.uuid4, primary_key=True, editable=False)
-    user_phone = models.ForeignKey(UserPhone, on_delete=models.CASCADE)
+    user_device = models.ForeignKey(Users_planty, on_delete=models.CASCADE, blank=True, null=True)
     last_event_date = models.DateField(default=now)
     frequency = models.IntegerField()
     event_type = models.CharField()
