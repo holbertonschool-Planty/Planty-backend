@@ -74,7 +74,7 @@ def create_event(request, users_id: UUID, user_phone_token: str, data: phone_eve
     return 201, get_phoneEvent_model().objects.create_event(userPhone_obj, dict(data))
 
 @router.get(
-        "{user_phone_token}/notifications",
+        "{user_phone_token}/notifications/",
         response={
             200: List[phone_event_schemas.PhoneEventOutput],
             400: schemas.BadRequestResponse,
