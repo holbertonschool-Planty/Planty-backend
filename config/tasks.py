@@ -163,9 +163,8 @@ def handle_sensors_alert(notification, type, threshold_high, threshold_low):
 def send_notification(title, body, tokens):
     responses = []
     for token in tokens:
-        print(token.token)
         status = send_notifications(expo_token=token.token, title=title, body=body)
-        responses.append({"event": token.user_phone, "response": status["data"]["details"]})
+        responses.append({"to": token.user.email, "token": token.token, "body": title, "response": status["data"]["status"]})
     return responses
 
 

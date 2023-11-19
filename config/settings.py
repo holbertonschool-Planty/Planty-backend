@@ -162,7 +162,7 @@ CELERY_BEAT_SCHEDULE = {
     },
     "manage_status_plants": {
         "task": "manage_status_plants",
-        "schedule": timedelta(minutes=30)
+        "schedule": timedelta(seconds=30)
     }
 }
 
