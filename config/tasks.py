@@ -5,7 +5,8 @@ from .celery import app
 import requests
 from datetime import datetime, timedelta
 from django.forms.models import model_to_dict
-
+from datetime import datetime
+import pytz
 
 
 @app.task(name="manage_notifications")
@@ -22,106 +23,52 @@ def manage_notifications():
                 notification.save()
     return list_responses
 
-
-# @app.task(name="manage_status_plants")
-# def manage_status_plants():
-#     list_responses = []
-#     list_notifications = get_phoneEvent_model().objects.filter(event_type__icontains="Temperature Alert")
-#     for notification in list_notifications:
-#         try:
-#             user_device = notification.user_device
-#             notification_dict = {}
-#             title = f'Temperature Alert - {user_device.plant_name}'
-#             if user_device.planty.actual_temperature[-1] + 6 < user_device.planty.plants_info.temperature:
-#                 body = f'Your plant {user_device.plant_name} might be feeling cold. Make sure to maintain a warmer room temperature to promote healthy growth. Consider using gentle heating or thermal blankets if needed.'
-#                 notification_dict = model_to_dict(notification)
-#                 for token in get_list_or_404(get_userPhone_model(), user_id=notification.user_device.user.id):
-#                     status = send_notifications(expo_token=token.token, title=title, body=body)
-#             elif user_device.planty.actual_temperature[-1] - 8 > user_device.planty.plants_info.temperature:
-#                 body = f'To keep your plant {user_device.plant_name} happy and healthy, we recommend adjusting the environmental temperature to a more suitable level. Ensure shade and, if possible, ventilate the area to reduce heat.'
-#                 notification_dict = model_to_dict(notification)
-#                 for token in get_list_or_404(get_userPhone_model(), user_id=notification.user_device.user.id):
-#                     status = send_notifications(expo_token=token.token, title=title, body=body)
-#             list_responses.append({"event": notification_dict["user_phone"], "response": status["data"]["details"]})
-#         except:
-#           pass
-#     list_notifications = get_phoneEvent_model().objects.filter(event_type__icontains="Light Alert")
-#     for notification in list_notifications:
-#         try:
-#             user_device = notification.user_device
-#             notification_dict = {}
-#             title = f'Light Alert - {user_device.plant_name}'
-#             if user_device.planty.actual_light[-1] + 30 < user_device.planty.plants_info.light:
-#                 body = f'Your plant {user_device.plant_name} need more light to efficiently carry out photosynthesis. Place them in a spot with bright indirect light or consider using grow lights to supplement natural light.'
-#                 notification_dict = model_to_dict(notification)
-#                 for token in get_list_or_404(get_userPhone_model(), user_id=notification.user_device.user.id):
-#                     status = send_notifications(expo_token=token.token, title=title, body=body)
-#             elif user_device.planty.actual_light[-1] - 30 > user_device.planty.plants_info.light:
-#                 body = f'Too much direct sunlight can be harmful to some plants. Move your plant {user_device.plant_name} to a location with partial shade or use curtains to filter the light. This will prevent it from getting sunburned.'
-#                 notification_dict = model_to_dict(notification)
-#                 for token in get_list_or_404(get_userPhone_model(), user_id=notification.user_device.user.id):
-#                     status = send_notifications(expo_token=token.token, title=title, body=body)
-#             list_responses.append({"event": notification_dict["user_phone"], "response": status["data"]["details"]})
-#         except:
-#           pass
-#     list_notifications = get_phoneEvent_model().objects.filter(event_type__icontains="Humidity Alert")
-#     for notification in list_notifications:
-#         try:
-#             user_device = notification.user_device
-#             notification_dict = {}
-#             title = f'Humidity Alert - {user_device.plant_name}'
-#             if user_device.planty.actual_watering[-1] + 30 < user_device.planty.plants_info.watering:
-#                 body = f'Your plant {user_device.plant_name} is dehydrated. Make sure to water it adequately to keep the soil slightly moist. Watch for wilting signs and adjust the watering frequency accordingly.'
-#                 notification_dict = model_to_dict(notification)
-#                 status = send_notifications(expo_token=notification.user_phone.token, title=title, body=body)
-#             elif user_device.planty.actual_watering[-1] - 30 > user_device.planty.plants_info.watering:
-#                 body = f'It seems you are providing too much water to your plant {user_device.plant_name}. To avoid overwatering and root problems, reduce the amount of water you give and ensure the soil is dry before watering again.'
-#                 notification_dict = model_to_dict(notification)
-#                 for token in get_list_or_404(get_userPhone_model(), user_id=notification.user_device.user.id):
-#                     status = send_notifications(expo_token=token.token, title=title, body=body)
-#             list_responses.append({"event": notification_dict["user_phone"], "response": status["data"]["details"]})
-#         except:
-#           pass
-#     return list_responses
-
 @app.task(name="manage_status_plants")
 def manage_status_plants():
     list_responses = []
 
-    # Manejo de alertas de temperatura
+    # Handling temperature alert.
     temperature_notifications = get_phoneEvent_model().objects.filter(event_type__icontains="Temperature Alert")
     for notification in temperature_notifications:
         try:
-            list_responses.extend(handle_sensors_alert(
-            notification,
-            type="temperature",
-            threshold_high=6,
-            threshold_low=8
-            ))
+            current_time = datetime.now(pytz.timezone(f"Etc/GMT{notification.user_device.planty.timezone}"))
+            if 6 <= current_time.hour and current_time.hour < 22:
+              list_responses.extend(handle_sensors_alert(
+              notification,
+              type="temperature",
+              threshold_high=6,
+              threshold_low=8
+              ))
         except Exception as e:
             pass
+    # Handling light alert.
     light_notifications = get_phoneEvent_model().objects.filter(event_type__icontains="Light Alert")
     for notification in light_notifications:
         try:
-            list_responses.extend(handle_sensors_alert(
-            notification,
-            type="light",
-            threshold_high=30,
-            threshold_low=30
-            ))
+            current_time = datetime.now(pytz.timezone(f"Etc/GMT{notification.user_device.planty.timezone}"))
+            if 6 <= current_time.hour and current_time.hour < 22:
+              list_responses.extend(handle_sensors_alert(
+              notification,
+              type="light",
+              threshold_high=30,
+              threshold_low=30
+              ))
         except Exception as e:
             pass
+    # Handling huimidity alert.
     humidity_notifications = get_phoneEvent_model().objects.filter(event_type__icontains="Humidity Alert")
     for notification in humidity_notifications:
         try:
-            list_responses.extend(handle_sensors_alert(
-            notification,
-            type="humidity",
-            threshold_high=30,
-            threshold_low=30
-            ))
+            current_time = datetime.now(pytz.timezone(f"Etc/GMT{notification.user_device.planty.timezone}"))
+            if 6 <= current_time.hour and current_time.hour < 22:
+              list_responses.extend(handle_sensors_alert(
+              notification,
+              type="humidity",
+              threshold_high=30,
+              threshold_low=30
+              ))
         except Exception as e:
-            pass
+          pass
     return list_responses
 
 def handle_sensors_alert(notification, type, threshold_high, threshold_low):
@@ -181,6 +128,6 @@ def send_notifications(expo_token: str, title: str, body: str):
         "sound": "default",
         "title": title,
         "body": body
-    }
+        }
     response = requests.post(url, headers=headers, json=data)
     return response.json()
