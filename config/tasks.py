@@ -11,100 +11,65 @@ import pytz
 
 @app.task(name="manage_notifications")
 def manage_notifications():
-    list_responses = []
-    list_notifications = get_phoneEvent_model().objects.filter(event_type__icontains="Watering Reminder")
-    for notification in list_notifications:
+    responses = []
+
+    watering_notifications = get_phoneEvent_model().objects.filter(event_type__icontains="Watering Reminder")
+    for notification in watering_notifications:
         if (notification.last_event_date + timedelta(days=notification.frequency - 1)) == datetime.today().date():
             notification_dict = model_to_dict(notification)
             status = send_notifications(expo_token=notification.user_phone.token, title=notification.event_type, body=notification.message)
-            list_responses.append({"event": notification_dict, "response": status["data"]})
+            responses.append({"event": notification_dict, "response": status["data"]})
             if status == 200:
                 notification.last_event_date = notification.last_event_date + timedelta(days=notification.frequency).date()
                 notification.save()
-    return list_responses
+
+    return responses
+
 
 @app.task(name="manage_status_plants")
 def manage_status_plants():
-    list_responses = []
+    responses = []
 
-    # Handling temperature alert.
-    temperature_notifications = get_phoneEvent_model().objects.filter(event_type__icontains="Temperature Alert")
-    for notification in temperature_notifications:
-        try:
-            current_time = datetime.now(pytz.timezone(f"Etc/GMT{notification.user_device.planty.timezone}"))
-            if 6 <= current_time.hour and current_time.hour < 22:
-              list_responses.extend(handle_sensors_alert(
-              notification,
-              type="temperature",
-              threshold_high=6,
-              threshold_low=8
-              ))
-        except Exception as e:
-            pass
-    # Handling light alert.
-    light_notifications = get_phoneEvent_model().objects.filter(event_type__icontains="Light Alert")
-    for notification in light_notifications:
-        try:
-            current_time = datetime.now(pytz.timezone(f"Etc/GMT{notification.user_device.planty.timezone}"))
-            if 6 <= current_time.hour and current_time.hour < 22:
-              list_responses.extend(handle_sensors_alert(
-              notification,
-              type="light",
-              threshold_high=30,
-              threshold_low=30
-              ))
-        except Exception as e:
-            pass
-    # Handling huimidity alert.
-    humidity_notifications = get_phoneEvent_model().objects.filter(event_type__icontains="Humidity Alert")
-    for notification in humidity_notifications:
-        try:
-            current_time = datetime.now(pytz.timezone(f"Etc/GMT{notification.user_device.planty.timezone}"))
-            if 6 <= current_time.hour and current_time.hour < 22:
-              list_responses.extend(handle_sensors_alert(
-              notification,
-              type="humidity",
-              threshold_high=30,
-              threshold_low=30
-              ))
-        except Exception as e:
-          pass
-    return list_responses
+    alerts = [
+        {"type": "temperature", "threshold_high": 6, "threshold_low": 8, "event_type": "Temperature Alert"},
+        {"type": "light", "threshold_high": 30, "threshold_low": 30, "event_type": "Light Alert"},
+        {"type": "humidity", "threshold_high": 30, "threshold_low": 30, "event_type": "Humidity Alert"},
+    ]
 
-def handle_sensors_alert(notification, type, threshold_high, threshold_low):
+    for alert in alerts:
+        notifications = get_phoneEvent_model().objects.filter(event_type__icontains=alert["event_type"])
+        for notification in notifications:
+            try:
+                current_time = datetime.now(pytz.timezone(f"Etc/GMT{notification.user_device.planty.timezone}"))
+                if 6 <= current_time.hour < 22:
+                    responses.extend(handle_sensors_alert(notification, **alert))
+            except Exception as e:
+                pass
+
+    return responses
+
+
+def handle_sensors_alert(notification, type, threshold_high, threshold_low, event_type):
     user_device = notification.user_device
     sensors_dict = {
-      "temperature": {
-        "sensor_value": user_device.planty.actual_temperature[-1],
-        "plant_value": user_device.planty.plants_info.temperature,
-        "title": f'Temperature Alert - {user_device.plant_name}', 
-        "low": f'Your plant {user_device.plant_name} might be feeling cold. Make sure to maintain a warmer room temperature to promote healthy growth. Consider using gentle heating or thermal blankets if needed.',
-        "high": f'To keep your plant {user_device.plant_name} happy and healthy, we recommend adjusting the environmental temperature to a more suitable level. Ensure shade and, if possible, ventilate the area to reduce heat.'
-      },
-      "humidity": {
-        "sensor_value": user_device.planty.actual_watering[-1],
-        "plant_value": user_device.planty.plants_info.watering,
-        "title": f'Humidity Alert - {user_device.plant_name}',
-        "low": f'Your plant {user_device.plant_name} is dehydrated. Make sure to water it adequately to keep the soil slightly moist. Watch for wilting signs and adjust the watering frequency accordingly.',
-        "high": f'It seems you are providing too much water to your plant {user_device.plant_name}. To avoid overwatering and root problems, reduce the amount of water you give and ensure the soil is dry before watering again.'
-      },
-      "light": {
-        "sensor_value": user_device.planty.actual_light[-1],
-        "plant_value": user_device.planty.plants_info.light,
-        "title": f'Light Alert - {user_device.plant_name}',
-        "low": f'Your plant {user_device.plant_name} need more light to efficiently carry out photosynthesis. Place them in a spot with bright indirect light or consider using grow lights to supplement natural light.',
-        "high": f'Too much direct sunlight can be harmful to some plants. Move your plant {user_device.plant_name} to a location with partial shade or use curtains to filter the light. This will prevent it from getting sunburned.'
-      }
+        "temperature": {"sensor_value": user_device.planty.actual_temperature[-1],
+                        "plant_value": user_device.planty.plants_info.temperature,
+                        "title": f'Temperature Alert - {user_device.plant_name}'},
+        "humidity": {"sensor_value": user_device.planty.actual_watering[-1],
+                     "plant_value": user_device.planty.plants_info.watering,
+                     "title": f'Humidity Alert - {user_device.plant_name}'},
+        "light": {"sensor_value": user_device.planty.actual_light[-1],
+                  "plant_value": user_device.planty.plants_info.light,
+                  "title": f'Light Alert - {user_device.plant_name}'},
     }
-    response = {}
-    #Low
-    if sensors_dict[type]["sensor_value"] + threshold_high < sensors_dict[type]["plant_value"]:
-        response = send_notification(sensors_dict[type]["title"], sensors_dict[type]["low"], get_list_or_404(get_userPhone_model(), user_id=notification.user_device.user.id))
-    #High  
-    elif sensors_dict[type]["sensor_value"] - threshold_low > sensors_dict[type]["plant_value"]:
-        response = send_notification(sensors_dict[type]["title"], sensors_dict[type]["high"], get_list_or_404(get_userPhone_model(), user_id=notification.user_device.user.id))
-    return response
 
+    response = {}
+    if sensors_dict[type]["sensor_value"] + threshold_high < sensors_dict[type]["plant_value"]:
+        response = send_notification(sensors_dict[type]["title"], f'Your plant {user_device.plant_name} might be feeling {event_type.lower()}.', get_list_or_404(get_userPhone_model(), user_id=notification.user_device.user.id))
+    elif sensors_dict[type]["sensor_value"] - threshold_low > sensors_dict[type]["plant_value"]:
+        response = send_notification(sensors_dict[type]["title"], f'To keep your plant {user_device.plant_name} happy and healthy, adjust the {event_type.lower()} conditions.', get_list_or_404(get_userPhone_model(), user_id=notification.user_device.user.id))
+
+    return response
 
 
 def send_notification(title, body, tokens):
@@ -128,6 +93,7 @@ def send_notifications(expo_token: str, title: str, body: str):
         "sound": "default",
         "title": title,
         "body": body
-        }
+    }
     response = requests.post(url, headers=headers, json=data)
     return response.json()
+    
