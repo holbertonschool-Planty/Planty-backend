@@ -3,7 +3,16 @@ This Django backend service provides a RESTful API to manage various data models
 ## Index
 
 - [Installation](#installation)
-- [API](#api)
+- [API Endpoints](#api-endpoints)
+- [Notifications API](#notifications-api)
+     - [Overview](#overview)
+     - [Setup](#setup)
+         - [Docker Compose](#docker-compose)
+         - [Django Settings](#django-settings)
+         - [Celery Configuration](#celery-configuration)
+     - [Usage](#usage)
+         - [Tasks Management](#tasks-management)
+         - [Notification Functions](#notification-functions)
 - [Creators](#creators)
 
 ## Installation
@@ -31,7 +40,7 @@ Once the service is up, you can access the API at **http://localhost:8080**.
 
 
 
-## API
+## API Endpoints
 
 <details>
 <summary><b>Plants Information Endpoints</b></summary>
@@ -1386,7 +1395,203 @@ Deletes a user-planty relationship with the specified ID.
 
 </details>
 
+# Notifications API
 
+## Overview
+
+This repository houses a Django Ninja backend microservice for the Planty application, focusing on managing notifications related to plant care. The microservice incorporates Celery for task scheduling, Redis as a message broker, and integrates with Expo services for mobile notifications.
+
+## Setup
+
+### Docker Compose
+
+Use Docker Compose to orchestrate the deployment of the microservice and its dependencies. The `docker-compose.yml` file defines services for the backend (`planty_be`), Celery worker (`worker`), Celery beat (`beat`), and Redis (`redis`).
+
+```yaml
+# Docker Compose snippet (details omitted for brevity)
+services:
+  planty_be:
+    image: ${GHCR_IMAGE}
+    container_name: planty_be
+    command: bash -c "python manage.py makemigrations Users && python manage.py makemigrations Plants && python manage.py makemigrations Devices && python manage.py makemigrations User_devices &&  python manage.py makemigrations && python manage.py migrate && python manage.py runserver 0.0.0.0:8080"
+    ports:
+      - "8080:8080"
+    networks:
+      - plantynet
+
+  worker:
+    image: ${GHCR_IMAGE}
+    container_name: planty_wr
+    command: celery -A config worker --loglevel=info
+    depends_on:
+      - redis
+    networks:
+      - plantynet
+
+  beat:
+    image: ${GHCR_IMAGE}
+    container_name: planty_bt
+    command: celery -A config beat --loglevel=info
+    depends_on:
+      - redis
+    networks:
+      - plantynet
+
+  redis:
+    image: redis:latest
+    container_name: redis
+    depends_on:
+      - planty_be
+    networks:
+      - plantynet
+```
+
+### Django Settings
+
+Configure Django settings in settings.py to enable Celery for task management. Specify the Celery broker and result backend, along with scheduling details for periodic tasks.
+
+```py
+# Django settings snippet (details omitted for brevity)
+CELERY_BROKER_URL = 'redis://redis:6379'
+CELERY_RESULT_BACKEND = 'redis://redis:6379'
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TIMEZONE = 'UTC'
+
+CELERY_BEAT_SCHEDULE = {
+    'manage_notifications': {
+        'task': 'manage_notifications',
+        'schedule': timedelta(days=1), 
+    },
+    "manage_status_plants": {
+        "task": "manage_status_plants",
+        "schedule": timedelta(hours=4)
+    }
+}
+```
+
+### Celery Configuration
+
+In celery.py, configure Celery and discover tasks in separate modules.
+
+```py
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
+app = Celery('config')
+app.config_from_object('django.conf:settings', namespace='CELERY')
+app.autodiscover_tasks(lambda: settings.INSTALLED_APPS)
+```
+
+## Usage
+### Tasks Management
+
+#### manage_notifications
+This task handles Watering Reminder notifications. It checks if the last notification date plus the frequency equals today's date and sends notifications accordingly.
+```py
+@app.task(name="manage_notifications")
+def manage_notifications():
+    responses = []
+    watering_notifications = get_phoneEvent_model().objects.filter(event_type__icontains="Watering Reminder")
+    for notification in watering_notifications:
+        if (notification.last_event_date + timedelta(days=notification.frequency - 1)) == datetime.today().date():
+            notification_dict = model_to_dict(notification)
+            status = send_notifications(expo_token=notification.user_phone.token, title=notification.event_type, body=notification.message)
+            responses.append({"event": notification_dict, "response": status["data"]})
+            if status == 200:
+                notification.last_event_date = notification.last_event_date + timedelta(days=notification.frequency).date()
+                notification.save()
+    return responses
+```
+
+#### manage_status_plants
+This task manages Temperature, Light, and Humidity alerts. It filters notifications based on alert type and user-defined thresholds. The function then calls handle_sensors_alert to send notifications.
+
+```py
+@app.task(name="manage_status_plants")
+def manage_status_plants():
+    responses = []
+
+    alerts = [
+        {"type": "temperature", "threshold_high": 6, "threshold_low": 8, "event_type": "Temperature Alert"},
+        {"type": "light", "threshold_high": 30, "threshold_low": 30, "event_type": "Light Alert"},
+        {"type": "humidity", "threshold_high": 30, "threshold_low": 30, "event_type": "Humidity Alert"},
+    ]
+
+    for alert in alerts:
+        notifications = get_phoneEvent_model().objects.filter(event_type__icontains=alert["event_type"])
+        for notification in notifications:
+            try:
+                current_time = datetime.now(pytz.timezone(f"Etc/GMT{notification.user_device.planty.timezone}"))
+                if 6 <= current_time.hour < 22:
+                    responses.extend(handle_sensors_alert(notification, **alert))
+            except Exception as e:
+                pass
+
+    return responses
+```
+
+#### handle_sensors_alert
+This function handles specific sensor alerts based on the type of sensor (Temperature, Humidity, or Light). It compares sensor values with plant values and sends notifications if conditions are outside the recommended range.
+
+```py
+def handle_sensors_alert(notification, type, threshold_high, threshold_low, event_type):
+    user_device = notification.user_device
+    sensors_dict = {
+        "temperature": {"sensor_value": user_device.planty.actual_temperature[-1],
+                        "plant_value": user_device.planty.plants_info.temperature,
+                        "title": f'Temperature Alert - {user_device.plant_name}'},
+        "humidity": {"sensor_value": user_device.planty.actual_watering[-1],
+                     "plant_value": user_device.planty.plants_info.watering,
+                     "title": f'Humidity Alert - {user_device.plant_name}'},
+        "light": {"sensor_value": user_device.planty.actual_light[-1],
+                  "plant_value": user_device.planty.plants_info.light,
+                  "title": f'Light Alert - {user_device.plant_name}'},
+    }
+
+    response = {}
+    if sensors_dict[type]["sensor_value"] + threshold_high < sensors_dict[type]["plant_value"]:
+        response = send_notification(sensors_dict[type]["title"], f'Your plant {user_device.plant_name} might be feeling {event_type.lower()}.', get_list_or_404(get_userPhone_model(), user_id=notification.user_device.user.id))
+    elif sensors_dict[type]["sensor_value"] - threshold_low > sensors_dict[type]["plant_value"]:
+        response = send_notification(sensors_dict[type]["title"], f'To keep your plant {user_device.plant_name} happy and healthy, adjust the {event_type.lower()} conditions.', get_list_or_404(get_userPhone_model(), user_id=notification.user_device.user.id))
+
+    return response
+```
+
+### Notification Functions
+
+#### send_notification
+Sends a notification to a list of user devices using Expo services. It receives a title, body, and a list of tokens.
+
+```py
+def send_notification(title, body, tokens):
+    responses = []
+    for token in tokens:
+        status = send_notifications(expo_token=token.token, title=title, body=body)
+        responses.append({"to": token.user.email, "token": token.token, "body": title, "response": status["data"]["status"]})
+    return responses
+```
+
+#### send_notifications
+Sends notifications to user devices using Expo services. It receives an Expo token, title, and body and returns the response from the Expo service.
+
+```py
+def send_notifications(expo_token: str, title: str, body: str):
+    url = "https://exp.host/--/api/v2/push/send"
+    headers = {
+        "host": "exp.host",
+        "accept": "application/json",
+        "accept-encoding": "gzip, deflate",
+        "content-type": "application/json"
+    }
+    data = {
+        "to": expo_token,
+        "sound": "default",
+        "title": title,
+        "body": body
+    }
+    response = requests.post(url, headers=headers, json=data)
+    return response.json()
+```
 
 ## Creators:
 ### [Facundo Alvarez](https://www.linkedin.com/in/facundo-alvarez4/)   <a href="https://github.com/Faqu22"><img align="center" alt="github" src="https://i.imgur.com/hGwhvpO.png" height="25"/></a>
